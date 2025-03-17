@@ -98,3 +98,31 @@ button:hover {
 #chk:checked ~ .signup label {
   transform: scale(0.6);
 }
+/* Estilos para el botón de Google */
+.google-btn {
+  width: 60%;
+  height: 40px;
+  margin: 10px auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Alinea el contenido a la izquierda */
+  gap: 10px; /* Espacio entre la imagen y el texto */
+  color: #757575; /* Color del texto */
+  background: #fff; /* Fondo blanco */
+  border: 1px solid #ccc; /* Borde gris */
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease-in;
+  padding-left: 10px; /* Espacio interno a la izquierda */
+}
+
+.google-btn:hover {
+  background: #f8f9fa; /* Fondo gris claro al hacer hover */
+}
+
+.google-btn img {
+  width: 20px; /* Tamaño de la imagen */
+  height: 20px;
+}
