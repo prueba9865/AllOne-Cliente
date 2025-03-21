@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Slide Navbar</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <!-- Iconos de Google Fonts -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
+
 <body>
     <div class="main">
         <input type="checkbox" id="chk" aria-hidden="true">
 
+        <!-- Formulario de registro -->
         <div class="signup">
-            <form>
+            <form id="registerForm">
                 <label for="chk" aria-hidden="true">Sign up</label>
-                <input type="text" name="txt" placeholder="User name">
-                <input type="email" name="email" placeholder="Email">
-                <input type="number" name="broj" placeholder="BrojTelefona">
-                <input type="password" name="pswd" placeholder="Password">
-                <button>Sign up</button>
+                <input type="text" name="nombre" placeholder="Nombre" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Contraseña" required>
+                <input type="password" name="password2" placeholder="Repetir Contraseña" required>
+                <button type="submit">Sign up</button>
             </form>
         </div>
 
+        <!-- Formulario de login -->
         <div class="login">
-            <form>
+            <form id="loginForm">
                 <label for="chk" aria-hidden="true">Login</label>
-                <input type="email" name="email" placeholder="Email" required="">
-                <input type="password" name="pswd" placeholder="Password" required="">
-                <button>Login</button>
+                <input type="text" name="username" placeholder="Usuario" required>
+                <input type="password" name="password" placeholder="Contraseña" required>
+                <button type="submit">Login</button>
 
                 <!-- Botón de Google -->
-                <button class="google-btn" onclick="loginWithGoogle()">
+                <button class="google-btn" type="button" onclick="loginWithGoogle()">
                     <img src="img/google.webp" alt="Google Logo">
                     <span>Iniciar sesión con Google</span>
                 </button>
@@ -39,12 +44,69 @@
     </div>
 
     <script>
+        // Función para enviar el formulario de registro
+        document.getElementById('registerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+
+            // Obtener los datos del formulario
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Enviar los datos al endpoint de registro
+            fetch('http://localhost:8080/api/v1/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Registro exitoso:', data);
+                    alert('Registro exitoso');
+                    // Redirigir al usuario o realizar otras acciones
+                })
+                .catch(error => {
+                    console.error('Error en el registro:', error);
+                    alert('Error en el registro');
+                });
+        });
+
+        // Función para enviar el formulario de login
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+
+            // Obtener los datos del formulario
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Enviar los datos al endpoint de login
+            fetch('http://localhost:8080/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Login exitoso:', data);
+                    alert('Login exitoso');
+                    // Redirigir al usuario o realizar otras acciones
+                    document.cookie = `token=${data.token}; path=/; max-age=86400`; // Expira en 1 dia
+                    window.location.href = "home.html"
+                })
+                .catch(error => {
+                    console.error('Error en el login:', error);
+                    alert('Error en el login');
+                });
+        });
+
         // Función para simular el inicio de sesión con Google
         function loginWithGoogle() {
-            alert('Iniciando sesión con Google...');
-            // Aquí puedes redirigir a la autenticación de Google
-            location.href = "http://localhost:8080/oauth2/authorization/google"
+            window.location.href = "http://localhost:8080/oauth2/authorization/google";
         }
     </script>
 </body>
+
 </html>
