@@ -6,7 +6,7 @@ body {
   align-items: center;
   min-height: 100vh;
   font-family: 'Jost', sans-serif;
-  background: linear-gradient(to bottom, #e0f7fa, #a5d6a7, #66bb6a); /* Degradado en tonos verdes */
+  background: linear-gradient(to bottom, #e0e7ff, #a5b4fc, #818cf8); /* Degradado en tonos azules/morados */
 }
 
 .main {
@@ -42,7 +42,7 @@ label {
 input {
   width: 60%;
   height: 10px;
-  background: #e0f7fa; /* Fondo en tono verde claro */
+  background: #e0e7ff; /* Fondo en tono azul claro */
   justify-content: center;
   display: flex;
   margin: 20px auto;
@@ -59,7 +59,7 @@ button {
   justify-content: center;
   display: block;
   color: #fff; /* Texto en blanco */
-  background: #2e7d32; /* Verde oscuro */
+  background: #5865F2; /* Color principal de Discord */
   font-size: 1em;
   font-weight: bold;
   margin-top: 30px;
@@ -71,7 +71,7 @@ button {
 }
 
 button:hover {
-  background: #388e3c; /* Verde un poco más claro al hacer hover */
+  background: #4f5bd5; /* Color más oscuro al hacer hover */
 }
 
 .login {
@@ -83,7 +83,7 @@ button:hover {
 }
 
 .login label {
-  color: #2e7d32; /* Texto en verde oscuro */
+  color: #5865F2; /* Texto en color de Discord */
   transform: scale(0.6);
 }
 
@@ -98,6 +98,7 @@ button:hover {
 #chk:checked ~ .signup label {
   transform: scale(0.6);
 }
+
 /* Estilos para el botón de Google */
 .google-btn {
   width: 60%;
