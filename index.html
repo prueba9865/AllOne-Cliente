@@ -18,11 +18,11 @@
         <div class="signup">
             <form id="registerForm">
                 <label for="chk" aria-hidden="true">Sign up</label>
-                <input type="text" name="nombre" placeholder="Nombre">
-                <input type="email" name="email" placeholder="Email">
-                <input type="text" name="username" placeholder="Username">
-                <input type="password" name="password" placeholder="Contraseña">
-                <input type="password" name="password2" placeholder="Repetir Contraseña">
+                <input type="text" name="nombre" id="nombre" placeholder="Nombre">
+                <input type="email" name="email" id="email" placeholder="Email">
+                <input type="text" name="username" id="username" placeholder="Username">
+                <input type="password" name="password" id="password" placeholder="Contraseña">
+                <input type="password" name="password2" id="password2" placeholder="Repetir Contraseña">
                 <button type="submit">Sign up</button>
             </form>
         </div>
@@ -31,8 +31,8 @@
         <div class="login">
             <form id="loginForm">
                 <label for="chk" aria-hidden="true">Login</label>
-                <input type="text" name="username" placeholder="Usuario">
-                <input type="password" name="password" placeholder="Contraseña">
+                <input type="text" name="usernameLogin" id="usernameLogin" placeholder="Usuario">
+                <input type="password" name="passwordLogin" id="passwordLogin" placeholder="Contraseña">
                 <button type="submit">Login</button>
 
                 <!-- Botón de Google -->
@@ -45,100 +45,130 @@
     </div>
 
     <script>
-        // Función para enviar el formulario de registro
-        document.getElementById('registerForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+        document.addEventListener('DOMContentLoaded', function () {
+            // Función para enviar el formulario de registro
+            document.getElementById('registerForm').addEventListener('submit', function (event) {
+                event.preventDefault(); // Evitar que el formulario se envíe automáticamente
 
-            // Obtener los datos del formulario
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
+                // Obtener los datos del formulario
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const password2 = document.getElementById('password2').value;
 
-            // Enviar los datos al endpoint de registro
-            fetch('http://localhost:8080/api/v1/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        // Si la respuesta no es exitosa, verificar si es un error 400
-                        return response.json().then(errorData => {
-                            throw errorData; // Lanzar los errores para manejarlos en el catch
+                // Validar los datos
+                const errores = {
+                    nombre: validarNombre(nombre),
+                    email: validarEmail(email),
+                    username: validarUsername(username),
+                    password: validarPassword(password),
+                    password2: validarPassword2(password, password2),
+                };
+
+                // Verificar si hay errores
+                const hayErrores = Object.values(errores).some(error => error !== null);
+
+                if (hayErrores) {
+                    // Mostrar los errores en la interfaz
+                    mostrarErrores(errores);
+                } else {
+                    // Si no hay errores, enviar los datos al servidor
+                    const data = { nombre, email, username, password, password2 };
+
+                    fetch('http://localhost:8080/api/v1/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(errorData => {
+                                    throw errorData; // Lanzar los errores para manejarlos en el catch
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Registro exitoso:', data);
+                            mostrarMensaje('Registro exitoso', 'exito');
+                        })
+                        .catch(errorData => {
+                            console.error('Error en el registro:', errorData);
+                            mostrarErrores(errorData); // Mostrar errores del servidor
                         });
-                    }
-                    return response.json(); // Si la respuesta es exitosa, devolver los datos
-                })
-                .then(data => {
-                    console.log('Registro exitoso:', data);
-                    mostrarMensaje('Registro exitoso', 'exito');
-                    // Redirigir al usuario o realizar otras acciones
-                })
-                .catch(errorData => {
-                    console.error('Error en el registro:', errorData);
-                    if (errorData.nombre) {
-                        // Si hay un mensaje de error en data.password, mostrarlo
-                        mostrarMensaje(errorData.nombre, 'error');
-                    } else if (errorData.email) {
-                        mostrarMensaje(errorData.email, 'error');
-                    } else if (errorData.username) {
-                        mostrarMensaje(errorData.username, 'error');
-                    } else if (errorData.password) {
-                        mostrarMensaje(errorData.password, 'error');
-                    } else if (errorData.password2) {
-                        mostrarMensaje(errorData.password2, 'error');
-                    } else if (errorData.error) {
-                        mostrarMensaje(errorData.error, 'error');
-                    } else {
-                        // Mostrar un mensaje genérico de error
-                        mostrarMensaje('Error en el registro', 'error');
-                    }
-                });
+                }
+            });
+
+            // Función para enviar el formulario de login
+            document.getElementById('loginForm').addEventListener('submit', function (event) {
+                event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+
+                // Obtener los valores de los inputs
+                const username = document.getElementById('usernameLogin').value;
+                const password = document.getElementById('passwordLogin').value;
+
+                // Validar los datos
+                const errores = {
+                    username: validarLoginUsername(username),
+                    password: validarLoginPassword(password),
+                };
+
+                // Verificar si hay errores
+                const hayErrores = Object.values(errores).some(error => error !== null);
+
+                if (hayErrores) {
+                    // Mostrar los errores en la interfaz
+                    mostrarErrores(errores);
+                } else {
+                    // Si no hay errores, enviar los datos al servidor
+                    const data = { username, password };
+
+                    fetch('http://localhost:8080/api/v1/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(errorData => {
+                                    throw errorData; // Lanzar los errores para manejarlos en el catch
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Login exitoso:', data);
+                            // Redirigir al usuario o realizar otras acciones
+                            document.cookie = `token=${data.token}; path=/; max-age=86400`; // Expira en 1 día
+                            window.location.href = "home.html";
+                        })
+                        .catch(errorData => {
+                            console.error('Error en el login:', errorData);
+                            if (errorData.message) {
+                                // Si hay un mensaje de error, mostrarlo
+                                mostrarMensaje(errorData.message, 'error');
+                            } else {
+                                // Mostrar un mensaje genérico de error
+                                mostrarMensaje('Error en el login', 'error');
+                            }
+                        });
+                }
+            });
         });
 
-        // Función para enviar el formulario de login
-        document.getElementById('loginForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // Evitar que el formulario se envíe automáticamente
-
-            // Obtener los datos del formulario
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
-
-            // Enviar los datos al endpoint de login
-            fetch('http://localhost:8080/api/v1/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        // Si la respuesta no es exitosa, verificar si es un error 400
-                        return response.json().then(errorData => {
-                            throw errorData; // Lanzar los errores para manejarlos en el catch
-                        });
-                    }
-                    return response.json(); // Si la respuesta es exitosa, devolver los datos
-                })
-                .then(data => {
-                    console.log('Login exitoso:', data);
-                    // Redirigir al usuario o realizar otras acciones
-                    document.cookie = `token=${data.token}; path=/; max-age=86400`; // Expira en 1 dia
-                    window.location.href = "home.html"
-                })
-                .catch(errorData => {
-                    console.error('Error en el registro:', errorData);
-                    if (errorData.message) {
-                        // Si hay un mensaje de error en data.password, mostrarlo
-                        mostrarMensaje(errorData.message, 'error');
-                    } else {
-                        // Mostrar un mensaje genérico de error
-                        mostrarMensaje('Error en el login', 'error');
-                    }
-                });
-        });
+        // Función para mostrar errores en la interfaz
+        function mostrarErrores(errores) {
+            for (const campo in errores) {
+                if (errores[campo]) {
+                    mostrarMensaje(errores[campo], 'error');
+                }
+            }
+        }
 
         // Función para simular el inicio de sesión con Google
         function loginWithGoogle() {
@@ -155,6 +185,83 @@
             setTimeout(() => {
                 contenedorMensaje.style.display = "none";
             }, 5000); // 5 segundos
+        }
+        // Función para validar el nombre
+        function validarNombre(nombre) {
+            const regex = /^[A-Za-zñÑáéíóúÁÉÍÓÚ ]{1,50}$/;
+            if (!nombre) {
+                return "El nombre no puede estar en blanco.";
+            }
+            if (!regex.test(nombre)) {
+                return "El nombre solo puede contener letras y espacios.";
+            }
+            return null; // No hay error
+        }
+
+        // Función para validar el email
+        function validarEmail(email) {
+            const regex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
+            if (!email) {
+                return "El email no puede estar en blanco.";
+            }
+            if (!regex.test(email)) {
+                return "Introduce un email válido.";
+            }
+            return null; // No hay error
+        }
+
+        // Función para validar el username
+        function validarUsername(username) {
+            const regex = /^[a-zA-Z0-9_.-]{3,20}$/;
+            if (!username) {
+                return "El usuario no puede estar en blanco.";
+            }
+            if (username.length < 3 || username.length > 20) {
+                return "El username debe tener entre 3 y 20 caracteres.";
+            }
+            if (!regex.test(username)) {
+                return "El username solo puede contener letras, números, puntos, guiones y guiones bajos.";
+            }
+            return null; // No hay error
+        }
+
+        // Función para validar la contraseña
+        function validarPassword(password) {
+            const regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+            if (!password) {
+                return "La contraseña no puede estar en blanco.";
+            }
+            if (password.length < 12) {
+                return "La contraseña debe tener mínimo 12 caracteres.";
+            }
+            if (!regex.test(password)) {
+                return "La contraseña debe tener al menos 12 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.";
+            }
+            return null; // No hay error
+        }
+
+        // Función para validar que las contraseñas coincidan
+        function validarPassword2(password, password2) {
+            if (password !== password2) {
+                return "Las contraseñas no coinciden.";
+            }
+            return null; // No hay error
+        }
+
+        // Función para validar el username en el login
+        function validarLoginUsername(username) {
+            if (!username) {
+                return "El nombre de usuario no puede estar en blanco.";
+            }
+            return null; // No hay error
+        }
+
+        // Función para validar la contraseña en el login
+        function validarLoginPassword(password) {
+            if (!password) {
+                return "La contraseña no puede estar en blanco.";
+            }
+            return null; // No hay error
         }
     </script>
 </body>
