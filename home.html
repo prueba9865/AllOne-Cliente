@@ -3,9 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido</title>
+    <title>Dashboard Completo</title>
+    <link rel="stylesheet" href="css/styles_home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-    Hola desde el home
+    <div class="tabs">
+        <button class="tab-button" data-tab="reels">Reels</button>
+        <button class="tab-button active" data-tab="chat">Chat</button>
+        <button class="tab-button" data-tab="ai">IA</button>
+    </div>
+    <div class="dashboard">
+        <!-- Sección de Reels -->
+        <div class="section reels-section" style="display: none;">
+            <h2>Reels</h2>
+            <div class="reels-container">
+                <div class="reel-item">
+                    <img src="https://picsum.photos/200/350" alt="Reel 1">
+                    <div class="reel-info">
+                        <span class="views">10.5K views</span>
+                        <span class="duration">0:30</span>
+                    </div>
+                </div>
+                <div class="reel-item">
+                    <img src="https://picsum.photos/200/351" alt="Reel 2">
+                    <div class="reel-info">
+                        <span class="views">8.2K views</span>
+                        <span class="duration">0:45</span>
+                    </div>
+                </div>
+                <div class="reel-item">
+                    <img src="https://picsum.photos/200/352" alt="Reel 3">
+                    <div class="reel-info">
+                        <span class="views">15K views</span>
+                        <span class="duration">1:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Chat -->
+        <div class="section chat-section active">
+            <!-- Vista de lista de chats -->
+            <div class="chat-list-view active">
+                <h2>Chats</h2>
+                <div class="chat-list-full" id="chatList">
+                    <!-- Los chats se cargarán dinámicamente -->
+                </div>
+            </div>
+            
+            <!-- Vista de chat individual -->
+            <div class="chat-detail-view">
+                <div class="chat-header">
+                    <button class="back-button" onclick="showChatList()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <img src="https://picsum.photos/40/40" alt="Profile" class="profile-pic">
+                    <span class="chat-name">Selecciona un chat</span>
+                </div>
+                <div class="messages" id="messages"></div>
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+                    <button onclick="sendMessage()">Enviar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de IA -->
+        <div class="section ai-section" style="display: none;">
+            <h2>Asistente IA</h2>
+            <div class="ai-container">
+                <div class="ai-messages" id="aiMessages">
+                    <div class="ai-message received">
+                        ¡Hola! Soy tu asistente IA. ¿En qué puedo ayudarte?
+                    </div>
+                </div>
+                <div class="ai-input-area">
+                    <textarea id="aiPrompt" placeholder="Escribe tu pregunta aquí..."></textarea>
+                    <button onclick="sendAIPrompt()">Preguntar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

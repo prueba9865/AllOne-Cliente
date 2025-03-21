@@ -3,13 +3,14 @@
 
 <head>
     <title>Slide Navbar</title>
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" type="text/css" href="css/styles_index.css">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
     <!-- Iconos de Google Fonts -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
+    <div id="mensaje" class="mensaje"></div>
     <div class="main">
         <input type="checkbox" id="chk" aria-hidden="true">
 
@@ -17,11 +18,11 @@
         <div class="signup">
             <form id="registerForm">
                 <label for="chk" aria-hidden="true">Sign up</label>
-                <input type="text" name="nombre" placeholder="Nombre" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <input type="password" name="password2" placeholder="Repetir Contraseña" required>
+                <input type="text" name="nombre" placeholder="Nombre">
+                <input type="email" name="email" placeholder="Email">
+                <input type="text" name="username" placeholder="Username">
+                <input type="password" name="password" placeholder="Contraseña">
+                <input type="password" name="password2" placeholder="Repetir Contraseña">
                 <button type="submit">Sign up</button>
             </form>
         </div>
@@ -30,8 +31,8 @@
         <div class="login">
             <form id="loginForm">
                 <label for="chk" aria-hidden="true">Login</label>
-                <input type="text" name="username" placeholder="Usuario" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
+                <input type="text" name="username" placeholder="Usuario">
+                <input type="password" name="password" placeholder="Contraseña">
                 <button type="submit">Login</button>
 
                 <!-- Botón de Google -->
@@ -60,15 +61,39 @@
                 },
                 body: JSON.stringify(data),
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        // Si la respuesta no es exitosa, verificar si es un error 400
+                        return response.json().then(errorData => {
+                            throw errorData; // Lanzar los errores para manejarlos en el catch
+                        });
+                    }
+                    return response.json(); // Si la respuesta es exitosa, devolver los datos
+                })
                 .then(data => {
                     console.log('Registro exitoso:', data);
-                    alert('Registro exitoso');
+                    mostrarMensaje('Registro exitoso', 'exito');
                     // Redirigir al usuario o realizar otras acciones
                 })
-                .catch(error => {
-                    console.error('Error en el registro:', error);
-                    alert('Error en el registro');
+                .catch(errorData => {
+                    console.error('Error en el registro:', errorData);
+                    if (errorData.nombre) {
+                        // Si hay un mensaje de error en data.password, mostrarlo
+                        mostrarMensaje(errorData.nombre, 'error');
+                    } else if (errorData.email) {
+                        mostrarMensaje(errorData.email, 'error');
+                    } else if (errorData.username) {
+                        mostrarMensaje(errorData.username, 'error');
+                    } else if (errorData.password) {
+                        mostrarMensaje(errorData.password, 'error');
+                    } else if (errorData.password2) {
+                        mostrarMensaje(errorData.password2, 'error');
+                    } else if (errorData.error) {
+                        mostrarMensaje(errorData.error, 'error');
+                    } else {
+                        // Mostrar un mensaje genérico de error
+                        mostrarMensaje('Error en el registro', 'error');
+                    }
                 });
         });
 
@@ -88,23 +113,48 @@
                 },
                 body: JSON.stringify(data),
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        // Si la respuesta no es exitosa, verificar si es un error 400
+                        return response.json().then(errorData => {
+                            throw errorData; // Lanzar los errores para manejarlos en el catch
+                        });
+                    }
+                    return response.json(); // Si la respuesta es exitosa, devolver los datos
+                })
                 .then(data => {
                     console.log('Login exitoso:', data);
-                    alert('Login exitoso');
                     // Redirigir al usuario o realizar otras acciones
                     document.cookie = `token=${data.token}; path=/; max-age=86400`; // Expira en 1 dia
                     window.location.href = "home.html"
                 })
-                .catch(error => {
-                    console.error('Error en el login:', error);
-                    alert('Error en el login');
+                .catch(errorData => {
+                    console.error('Error en el registro:', errorData);
+                    if (errorData.message) {
+                        // Si hay un mensaje de error en data.password, mostrarlo
+                        mostrarMensaje(errorData.message, 'error');
+                    } else {
+                        // Mostrar un mensaje genérico de error
+                        mostrarMensaje('Error en el login', 'error');
+                    }
                 });
         });
 
         // Función para simular el inicio de sesión con Google
         function loginWithGoogle() {
             window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const contenedorMensaje = document.getElementById("mensaje");
+            contenedorMensaje.textContent = mensaje;
+            contenedorMensaje.className = `mensaje ${tipo}`; // Aplica la clase de estilo
+            contenedorMensaje.style.display = "block"; // Muestra el mensaje
+
+            // Opcional: Ocultar el mensaje después de unos segundos
+            setTimeout(() => {
+                contenedorMensaje.style.display = "none";
+            }, 5000); // 5 segundos
         }
     </script>
 </body>
