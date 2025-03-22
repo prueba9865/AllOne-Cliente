@@ -1,159 +1,214 @@
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    font-family: 'Jost', sans-serif;
-    background: linear-gradient(to bottom, #e0e7ff, #a5b4fc, #818cf8);
-    position: relative;
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Jost', sans-serif;
 }
-  
-  .main {
-    width: 350px;
-    height: 570px;
-    overflow: hidden;
-    background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover;
-    border-radius: 10px;
-    box-shadow: 5px 20px 50px rgba(0, 0, 0, 0.3); /* Sombra más suave */
-  }
-  
-  #chk {
-    display: none;
-  }
-  
-  .signup {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  
-  label {
-    color: #fff; /* Texto en blanco */
-    font-size: 2.3em;
-    justify-content: center;
-    display: flex;
-    margin: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.5s ease-in-out;
-  }
-  
-  input {
-    width: 60%;
-    height: 10px;
-    background: #e0e7ff; /* Fondo en tono azul claro */
-    justify-content: center;
-    display: flex;
-    margin: 20px auto;
-    padding: 12px;
-    border: none;
-    outline: none;
-    border-radius: 5px;
-  }
-  
-  button {
-    width: 60%;
-    height: 40px;
-    margin: 10px auto;
-    justify-content: center;
-    display: block;
-    color: #fff; /* Texto en blanco */
-    background: #5865F2; /* Color principal de Discord */
-    font-size: 1em;
-    font-weight: bold;
-    margin-top: 30px;
-    outline: none;
-    border: none;
-    border-radius: 5px;
-    transition: 0.2s ease-in;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background: #4f5bd5; /* Color más oscuro al hacer hover */
-  }
-  
-  .login {
-    height: 460px;
-    background: #fff; /* Fondo blanco */
-    border-radius: 60% / 10%;
-    transform: translateY(-180px);
-    transition: 0.8s ease-in-out;
-  }
-  
-  .login label {
-    color: #5865F2; /* Texto en color de Discord */
-    transform: scale(0.6);
-  }
-  
-  #chk:checked ~ .login {
-    transform: translateY(-530px);
-  }
-  
-  #chk:checked ~ .login label {
-    transform: scale(1);
-  }
-  
-  #chk:checked ~ .signup label {
-    transform: scale(0.6);
-  }
-  
-  /* Estilos para el botón de Google */
-  .google-btn {
-    width: 60%;
-    height: 40px;
-    margin: 10px auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* Alinea el contenido a la izquierda */
-    gap: 10px; /* Espacio entre la imagen y el texto */
-    color: #757575; /* Color del texto */
-    background: #fff; /* Fondo blanco */
-    border: 1px solid #ccc; /* Borde gris */
-    font-size: 1em;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.2s ease-in;
-    padding-left: 10px; /* Espacio interno a la izquierda */
-  }
-  
-  .google-btn:hover {
-    background: #f8f9fa; /* Fondo gris claro al hacer hover */
-  }
-  
-  .google-btn img {
-    width: 20px; /* Tamaño de la imagen */
-    height: 20px;
-  }
 
-  #mensaje {
-    position: absolute;
-    top: 20px; /* Distancia desde la parte superior */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 400px;
-    padding: 15px;
-    border-radius: 5px;
-    font-size: 16px;
-    text-align: center;
-    display: none; /* Oculto por defecto */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1000; /* Asegura que quede por encima de todo */
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Jost', sans-serif;
+  background: linear-gradient(to bottom, #e0e7ff, #a5b4fc, #818cf8);
+  position: relative;
 }
-  
-  .mensaje.error {
-    background-color: #ffebee; /* Fondo rojo claro */
-    color: #c62828; /* Texto rojo oscuro */
-    border: 1px solid #c62828;
-  }
-  
-  .mensaje.exito {
-    background-color: #e8f5e9; /* Fondo verde claro */
-    color: #2e7d32; /* Texto verde oscuro */
-    border: 1px solid #2e7d32;
-  }
+
+.main {
+  width: 350px;
+  height: 570px;
+  overflow: hidden;
+  background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover;
+  border-radius: 10px;
+  box-shadow: 5px 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+#chk {
+  display: none;
+}
+
+.signup {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+label {
+  color: #fff;
+  font-size: 2.3em;
+  justify-content: center;
+  display: flex;
+  margin: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.5s ease-in-out;
+}
+
+input {
+  width: 60%;
+  height: 10px;
+  background: #e0e7ff;
+  justify-content: center;
+  display: flex;
+  margin: 20px auto;
+  padding: 12px;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+}
+
+button {
+  width: 60%;
+  height: 40px;
+  margin: 10px auto;
+  justify-content: center;
+  display: block;
+  color: #fff;
+  background: #5865F2;
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: 30px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  transition: 0.2s ease-in;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #4f5bd5;
+}
+
+.login {
+  height: 460px;
+  background: #fff;
+  border-radius: 60% / 10%;
+  transform: translateY(-180px);
+  transition: 0.8s ease-in-out;
+}
+
+.login label {
+  color: #5865F2;
+  transform: scale(0.6);
+}
+
+#chk:checked ~ .login {
+  transform: translateY(-530px);
+}
+
+#chk:checked ~ .login label {
+  transform: scale(1);
+}
+
+#chk:checked ~ .signup label {
+  transform: scale(0.6);
+}
+
+/* Estilos para el botón de Google */
+.google-btn {
+  width: 60%;
+  height: 40px;
+  margin: 10px auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  color: #757575;
+  background: #fff;
+  border: 1px solid #ccc;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease-in;
+  padding-left: 10px;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+}
+
+.google-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+#mensaje {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  padding: 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  text-align: center;
+  display: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.mensaje.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #c62828;
+}
+
+.mensaje.exito {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+}
+
+/* Estilos para el botón de subir imagen */
+.custom-file-upload {
+  width: 100px; /* Reducir el tamaño del círculo */
+  height: 100px; /* Reducir el tamaño del círculo */
+  margin-top: 0; /* Eliminar el margen superior */
+  margin-bottom: 0; /* Eliminar el margen inferior si lo hubiera */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #5865F2, #4f5bd5);
+  border: 2px dashed rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0; /* Eliminar cualquier margen adicional */
+  font-size: 1em;
+}
+
+.custom-file-upload label:hover {
+  transform: scale(1.05);
+  background: linear-gradient(45deg, #4f5bd5, #5865F2);
+}
+
+.custom-file-upload .icon {
+  font-size: 1.5em; /* Reducir tamaño del icono */
+  margin-bottom: 5px;
+  color: white;
+}
+
+.custom-file-upload .text {
+  color: white;
+  font-size: 0.9em;
+  text-align: center;
+}

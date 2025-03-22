@@ -16,8 +16,18 @@
 
         <!-- Formulario de registro -->
         <div class="signup">
-            <form id="registerForm">
+            <form id="registerForm" enctype="multipart/form-data">
                 <label for="chk" aria-hidden="true">Sign up</label>
+                
+                <!-- Botón personalizado para subir imagen -->
+                <div class="custom-file-upload">
+                    <input type="file" name="avatar" id="avatar" accept="image/*" />
+                    <label for="avatar">
+                        <span class="icon">+</span>
+                        <span class="text">Sube tu imagen</span>
+                    </label>
+                </div>
+                
                 <input type="text" name="nombre" id="nombre" placeholder="Nombre">
                 <input type="email" name="email" id="email" placeholder="Email">
                 <input type="text" name="username" id="username" placeholder="Username">
@@ -37,7 +47,7 @@
 
                 <!-- Botón de Google -->
                 <button class="google-btn" type="button" onclick="loginWithGoogle()">
-                    <img src="img/google.webp" alt="Google Logo">
+                    <img src="https://www.google.com/favicon.ico" alt="Google Logo">
                     <span>Iniciar sesión con Google</span>
                 </button>
             </form>
@@ -158,6 +168,11 @@
                             }
                         });
                 }
+            });
+            document.getElementById('avatar').addEventListener('change', function (e) {
+                const fileName = e.target.files[0].name;
+                const container = document.querySelector('.file-input-container');
+                container.setAttribute('data-text', `Archivo seleccionado: ${fileName}`);
             });
         });
 
