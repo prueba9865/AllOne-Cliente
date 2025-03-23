@@ -18,16 +18,16 @@
         <div class="signup">
             <form id="registerForm" enctype="multipart/form-data">
                 <label for="chk" aria-hidden="true">Sign up</label>
-                
+
                 <!-- Botón personalizado para subir imagen -->
                 <div class="custom-file-upload">
-                    <input type="file" name="avatar" id="avatar" accept="image/*" />
+                    <input type="file" name="avatar" id="avatar" />
                     <label for="avatar">
                         <span class="icon">+</span>
-                        
+
                     </label>
                 </div>
-                
+
                 <input type="text" name="nombre" id="nombre" placeholder="Nombre">
                 <input type="email" name="email" id="email" placeholder="Email">
                 <input type="text" name="username" id="username" placeholder="Username">
@@ -58,58 +58,43 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Función para enviar el formulario de registro
             document.getElementById('registerForm').addEventListener('submit', function (event) {
-                event.preventDefault(); // Evitar que el formulario se envíe automáticamente
+                event.preventDefault();
 
-                // Obtener los datos del formulario
                 const nombre = document.getElementById('nombre').value;
                 const email = document.getElementById('email').value;
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
                 const password2 = document.getElementById('password2').value;
+                const avatar = document.getElementById('avatar').files[0];
 
-                // Validar los datos
-                const errores = {
-                    nombre: validarNombre(nombre),
-                    email: validarEmail(email),
-                    username: validarUsername(username),
-                    password: validarPassword(password),
-                    password2: validarPassword2(password, password2),
-                };
+                const formData = new FormData();
+                formData.append('nombre', nombre);
+                formData.append('email', email);
+                formData.append('username', username);
+                formData.append('password', password);
+                formData.append('password2', password2);
+                formData.append('avatar', avatar);
 
-                // Verificar si hay errores
-                const hayErrores = Object.values(errores).some(error => error !== null);
-
-                if (hayErrores) {
-                    // Mostrar los errores en la interfaz
-                    mostrarErrores(errores);
-                } else {
-                    // Si no hay errores, enviar los datos al servidor
-                    const data = { nombre, email, username, password, password2 };
-
-                    fetch('http://localhost:8080/api/v1/auth/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
+                fetch('http://localhost:8080/api/v1/auth/register', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw errorData;
+                            });
+                        }
+                        return response.json();
                     })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(errorData => {
-                                    throw errorData; // Lanzar los errores para manejarlos en el catch
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Registro exitoso:', data);
-                            mostrarMensaje('Registro exitoso', 'exito');
-                        })
-                        .catch(errorData => {
-                            console.error('Error en el registro:', errorData);
-                            mostrarErrores(errorData); // Mostrar errores del servidor
-                        });
-                }
+                    .then(data => {
+                        console.log('Registro exitoso:', data);
+                        mostrarMensaje('Registro exitoso', 'exito');
+                    })
+                    .catch(errorData => {
+                        console.error('Error en el registro:', errorData);
+                        mostrarErrores(errorData);
+                    });
             });
 
             // Función para enviar el formulario de login
