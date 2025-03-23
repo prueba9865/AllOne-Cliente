@@ -166,14 +166,43 @@ button:hover {
   border: 1px solid #2e7d32;
 }
 
-/* Estilos para el botón de subir imagen */
+/* Ajustar el margen superior del botón de subir imagen */
 .custom-file-upload {
-  width: 100px; /* Reducir el tamaño del círculo */
-  height: 100px; /* Reducir el tamaño del círculo */
-  margin-top: 0; /* Eliminar el margen superior */
-  margin-bottom: 0; /* Eliminar el margen inferior si lo hubiera */
-  margin-left: auto;
-  margin-right: auto;
+  width: 100px;
+  height: 100px;
+  margin: 5px auto; /* Reducir el margen superior a 5px */
+}
+
+/* Ajustar el margen superior de los inputs */
+input {
+  width: 60%;
+  height: 10px;
+  background: #e0e7ff;
+  justify-content: center;
+  display: flex;
+  margin: 10px auto; /* Reducir el margen superior a 10px */
+  padding: 12px;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+}
+
+/* Ajustar el margen superior del botón de "Sign up" */
+button[type="submit"] {
+  width: 60%;
+  height: 40px;
+  margin: 10px auto; /* Reducir el margen superior a 10px */
+  justify-content: center;
+  display: block;
+  color: #fff;
+  background: #5865F2;
+  font-size: 1em;
+  font-weight: bold;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  transition: 0.2s ease-in;
+  cursor: pointer;
 }
 
 .custom-file-upload input[type="file"] {
@@ -188,7 +217,7 @@ button:hover {
   align-items: center;
   justify-content: center;
   background: linear-gradient(45deg, #5865F2, #4f5bd5);
-  border: 2px dashed rgba(255, 255, 255, 0.7);
+  /*border: 2px dashed rgba(255, 255, 255, 0.7);*/
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
