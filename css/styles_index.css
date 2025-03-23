@@ -166,11 +166,15 @@ button:hover {
   border: 1px solid #2e7d32;
 }
 
-/* Ajustar el margen superior del botón de subir imagen */
 .custom-file-upload {
   width: 100px;
   height: 100px;
-  margin: 5px auto; /* Reducir el margen superior a 5px */
+  margin: 5px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  background-size: cover; /* Asegura que la imagen cubra el círculo */
+  background-position: center;
 }
 
 /* Ajustar el margen superior de los inputs */
@@ -217,12 +221,20 @@ button[type="submit"] {
   align-items: center;
   justify-content: center;
   background: linear-gradient(45deg, #5865F2, #4f5bd5);
-  /*border: 2px dashed rgba(255, 255, 255, 0.7);*/
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 0; /* Eliminar cualquier margen adicional */
+  margin: 0;
   font-size: 1em;
+  position: absolute; /* Asegura que el label esté encima */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.custom-file-upload label.has-image {
+  background: transparent; /* Oculta el fondo morado si hay imagen */
 }
 
 .custom-file-upload label:hover {
@@ -231,7 +243,7 @@ button[type="submit"] {
 }
 
 .custom-file-upload .icon {
-  font-size: 1.5em; /* Reducir tamaño del icono */
+  font-size: 1.5em;
   margin-bottom: 5px;
   color: white;
 }

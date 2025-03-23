@@ -20,7 +20,7 @@
                 <label for="chk" aria-hidden="true">Sign up</label>
 
                 <!-- Botón personalizado para subir imagen -->
-                <div class="custom-file-upload">
+                <div class="custom-file-upload" id="imagenAvatar">
                     <input type="file" name="avatar" id="avatar" />
                     <label for="avatar">
                         <span class="icon">+</span>
@@ -56,6 +56,39 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM completamente cargado');
+
+            const avatarInput = document.getElementById('avatar');
+            const imagenAvatar = document.getElementById('imagenAvatar');
+
+            if (!avatarInput || !imagenAvatar) {
+                console.error('El elemento con ID "avatar" o "imagenAvatar" no se encontró en el DOM.');
+                return;
+            }
+
+            avatarInput.addEventListener('change', function () {
+                const archivo = this.files[0];
+
+                if (archivo) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        // Aplica la imagen seleccionada como background-image
+                        imagenAvatar.style.backgroundImage = `url('${e.target.result}')`;
+                        imagenAvatar.style.backgroundSize = 'cover';
+                        imagenAvatar.style.backgroundPosition = 'center';
+                        imagenAvatar.style.borderRadius = '50%';
+
+                        // Quita el fondo del label
+                        document.querySelector(".custom-file-upload label").classList.add("has-image");
+                    };
+
+                    reader.readAsDataURL(archivo);
+                }
+            });
+
+
+
             // Función para enviar el formulario de registro
             document.getElementById('registerForm').addEventListener('submit', function (event) {
                 event.preventDefault();
@@ -65,7 +98,16 @@
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
                 const password2 = document.getElementById('password2').value;
-                const avatar = document.getElementById('avatar').files[0];
+
+                const avatarInput = document.getElementById('avatar');
+
+                if (!avatarInput) {
+                    console.error('El elemento con ID "avatar" no se encontró en el DOM.');
+                    //console.log('Contenido del body:', document.body.innerHTML); // Muestra el contenido del body
+                    return;
+                }
+
+                const avatar = avatarInput.files[0];
 
                 const formData = new FormData();
                 formData.append('nombre', nombre);
@@ -153,11 +195,6 @@
                             }
                         });
                 }
-            });
-            document.getElementById('avatar').addEventListener('change', function (e) {
-                const fileName = e.target.files[0].name;
-                const container = document.querySelector('.file-input-container');
-                container.setAttribute('data-text', `Archivo seleccionado: ${fileName}`);
             });
         });
 
