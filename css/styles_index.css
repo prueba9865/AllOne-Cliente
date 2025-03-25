@@ -167,11 +167,12 @@ button:hover {
 }
 
 .custom-file-upload {
+  padding: 10px;
   width: 100px;
   height: 100px;
   margin: 5px auto;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   background-size: cover; /* Asegura que la imagen cubra el círculo */
   background-position: center;
@@ -239,7 +240,7 @@ button[type="submit"] {
 
 .custom-file-upload label:hover {
   transform: scale(1.05);
-  background: linear-gradient(45deg, #4f5bd5, #5865F2);
+  background: linear-gradient(45deg);
 }
 
 .custom-file-upload .icon {

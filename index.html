@@ -60,6 +60,7 @@
 
             const avatarInput = document.getElementById('avatar');
             const imagenAvatar = document.getElementById('imagenAvatar');
+            const plusIcon = document.querySelector('.custom-file-upload .icon');
 
             if (!avatarInput || !imagenAvatar) {
                 console.error('El elemento con ID "avatar" o "imagenAvatar" no se encontró en el DOM.');
@@ -84,6 +85,8 @@
                     };
 
                     reader.readAsDataURL(archivo);
+                    // Hacer el icono "+" transparente
+                    plusIcon.style.opacity = '0.5';
                 }
             });
 
