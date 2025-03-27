@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="tabs">
         <button class="tab-button" data-tab="reels">Reels</button>
@@ -52,7 +54,7 @@
                     <!-- Los chats se cargarán dinámicamente -->
                 </div>
             </div>
-            
+
             <!-- Vista de chat individual -->
             <div class="chat-detail-view">
                 <div class="chat-header">
@@ -86,6 +88,51 @@
             </div>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = getCookie("token");
+
+            if (!token) {
+                console.error("No se encontró el token en cookies");
+                return;
+            }
+
+            fetch("http://localhost:8080/decode-jwt", {
+                method: "GET",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include' // 👈 Necesario si usas cookies HttpOnly
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("El avatar es: " + data.avatar);
+                })
+                .catch(error => {
+                    console.error("Error en la petición:", error);
+                    // Redirigir a login si es error 401
+                    if (error.message.includes("401")) window.location.href = "/login";
+                });
+        });
+
+        // Función para obtener el valor de una cookie por nombre
+        function getCookie(name) {
+            const cookies = document.cookie.split('; ');
+            for (const cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue); // Decodifica caracteres especiales
+                }
+            }
+            return null; // Si no encuentra la cookie
+        }
+    </script>
 </body>
+
 </html>
