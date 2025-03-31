@@ -11,6 +11,15 @@
 </head>
 
 <body>
+    <!-- Avatar circular en esquina superior derecha -->
+    <div class="profile-avatar" id="profileAvatar">
+        <div class="profile-dropdown" id="profileDropdown">
+            <a href="/profile"><i class="fas fa-user"></i> Mi perfil</a>
+            <a href="/settings"><i class="fas fa-cog"></i> Configuración</a>
+            <a href="/logout" class="logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </div>
+    </div>
+
     <div class="tabs">
         <button class="tab-button" data-tab="reels">Reels</button>
         <button class="tab-button active" data-tab="chat">Chat</button>
@@ -90,10 +99,63 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const profileAvatar = document.getElementById('profileAvatar');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const logoutButton = profileDropdown.querySelector('a.logout');
+
+            // Variables globales
+            let menuTimeout;
+            const menuHoverDelay = 200; // ms de retraso para cerrar
+
+            // Configuración de eventos
+            profileAvatar.addEventListener('mouseenter', () => {
+                clearTimeout(menuTimeout);
+                profileDropdown.classList.add('show-dropdown');
+            });
+
+            profileAvatar.addEventListener('mouseleave', () => {
+                menuTimeout = setTimeout(() => {
+                    if (!profileDropdown.matches(':hover')) {
+                        profileDropdown.classList.remove('show-dropdown');
+                    }
+                }, menuHoverDelay);
+            });
+
+            profileDropdown.addEventListener('mouseenter', () => {
+                clearTimeout(menuTimeout);
+            });
+
+            profileDropdown.addEventListener('mouseleave', () => {
+                menuTimeout = setTimeout(() => {
+                    profileDropdown.classList.remove('show-dropdown');
+                }, menuHoverDelay);
+            });
+
+            // Evento click para dispositivos táctiles
+            profileAvatar.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show-dropdown');
+            });
+
+            // Cierre al hacer click fuera
+            document.addEventListener('click', (e) => {
+                if (!profileAvatar.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.remove('show-dropdown');
+                }
+            });
+
+            logoutButton.addEventListener('click', function(e) {
+    e.preventDefault(); // Evita que siga el href
+    handleLogout(); // Llama a la función
+});
+
             const token = getCookie("token");
 
             if (!token) {
                 console.error("No se encontró el token en cookies");
+                // Imagen por defecto si no hay avatar
+                profileAvatar.style.backgroundImage = 'url(https://www.gravatar.com/avatar/default?s=200)';
+                profileAvatar.style.backgroundColor = getRandomColor();
                 return;
             }
 
@@ -113,11 +175,18 @@
                 })
                 .then(data => {
                     console.log("El avatar es: " + data.avatar);
+                    if (data.avatar) {
+                        profileAvatar.style.backgroundImage = `url(${data.avatar})`;
+                    } else {
+                        // Imagen por defecto si no hay avatar
+                        profileAvatar.style.backgroundImage = 'url(https://www.gravatar.com/avatar/default?s=200)';
+                        profileAvatar.style.backgroundColor = getRandomColor();
+                    }
                 })
                 .catch(error => {
                     console.error("Error en la petición:", error);
                     // Redirigir a login si es error 401
-                    if (error.message.includes("401")) window.location.href = "/login";
+                    if (error.message.includes("401")) window.location.href = "/index.html";
                 });
         });
 
@@ -131,6 +200,14 @@
                 }
             }
             return null; // Si no encuentra la cookie
+        }
+
+        // Función para manejar el logout
+        function handleLogout() {
+            // Elimina la cookie del token
+            document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            // Redirige al login
+            window.location.href = '/index.html';
         }
     </script>
 </body>
