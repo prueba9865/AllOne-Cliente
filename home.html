@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <!-- Fondo oscuro (se mostrará cuando el popup esté activo) -->
+    <div id="overlay"></div>
+
     <!-- Avatar circular en esquina superior derecha -->
     <div class="profile-avatar" id="profileAvatar">
         <div class="profile-dropdown" id="profileDropdown">
@@ -19,6 +22,30 @@
             <a href="/logout" class="logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
         </div>
     </div>
+
+    <!-- Botón para agregar gente -->
+    <div class="add-people-btn" id="addPeopleBtn">
+        <i class="fas fa-user-plus"></i>
+    </div>
+
+    <!-- Popup de búsqueda -->
+    <div class="search-popup" id="searchPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Agregar nuevo contacto</h3>
+                <button class="close-popup" id="closePopup">&times;</button>
+            </div>
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="userSearchInput" placeholder="Buscar..."
+                        class="search-input">
+                </div>
+                <div class="search-results" id="userSearchResults"></div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="tabs">
         <button class="tab-button" data-tab="reels">Reels</button>
@@ -99,6 +126,115 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del popup
+            const addPeopleBtn = document.getElementById('addPeopleBtn');
+            const searchPopup = document.getElementById('searchPopup');
+            const closePopup = document.getElementById('closePopup');
+            const userSearchInput = document.getElementById('userSearchInput');
+            const userSearchResults = document.getElementById('userSearchResults');
+
+            // Mostrar popup
+            addPeopleBtn.addEventListener('click', () => {
+                searchPopup.classList.add('active');
+            });
+
+            // Ocultar popup
+            closePopup.addEventListener('click', () => {
+                searchPopup.classList.remove('active');
+            });
+
+            // Buscar usuarios (simulación)
+            userSearchInput.addEventListener('input', function (e) {
+                const query = e.target.value.trim();
+
+                if (query.length > 0) {
+                    // Simulación de búsqueda - reemplazar con llamada a tu API
+                    simulateUserSearch(query);
+                } else {
+                    userSearchResults.innerHTML = '';
+                }
+            });
+
+            function simulateUserSearch(query) {
+                // Datos de ejemplo - reemplazar con tu API real
+                const mockUsers = [
+                    {
+                        id: 1,
+                        name: "María González",
+                        username: "maria_g",
+                        avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+                    },
+                    {
+                        id: 2,
+                        name: "Carlos López",
+                        username: "carlos_tech",
+                        avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+                    },
+                    {
+                        id: 3,
+                        name: "Ana Martínez",
+                        username: "ana_design",
+                        avatar: "https://randomuser.me/api/portraits/women/63.jpg"
+                    }
+                ];
+
+                const filteredUsers = mockUsers.filter(user =>
+                    user.name.toLowerCase().includes(query.toLowerCase()) ||
+                    user.username.toLowerCase().includes(query.toLowerCase())
+                );
+
+                displaySearchResults(filteredUsers);
+            }
+
+            function displaySearchResults(users) {
+                userSearchResults.innerHTML = '';
+
+                if (users.length === 0) {
+                    userSearchResults.innerHTML = '<div class="no-results">No se encontraron usuarios</div>';
+                    return;
+                }
+
+                users.forEach(user => {
+                    const userCard = document.createElement('div');
+                    userCard.className = 'user-card';
+                    userCard.innerHTML = `
+                        <img src="${user.avatar}" alt="${user.name}" class="user-avatar">
+                        <div class="user-info">
+                            <div class="user-name">${user.name}</div>
+                            <div class="user-username">@${user.username}</div>
+                        </div>
+                        <button class="add-btn">Agregar</button>
+                    `;
+
+                    // Lógica para agregar usuario
+                    userCard.querySelector('.add-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        console.log('Usuario agregado:', user.id);
+                        // Aquí iría tu lógica para agregar el usuario
+                    });
+
+                    userSearchResults.appendChild(userCard);
+                });
+            }
+
+            // Cerrar popup al hacer clic fuera
+            searchPopup.addEventListener('click', (e) => {
+                if (e.target === searchPopup) {
+                    searchPopup.classList.remove('active');
+                }
+            });
+
+            // Estilo para "no hay resultados"
+            const style = document.createElement('style');
+            style.textContent = `
+    .no-results {
+        padding: 20px;
+        text-align: center;
+        color: #6b7280;
+    }
+`;
+            document.head.appendChild(style);
+
             const profileAvatar = document.getElementById('profileAvatar');
             const profileDropdown = document.getElementById('profileDropdown');
             const logoutButton = profileDropdown.querySelector('a.logout');
@@ -144,10 +280,10 @@
                 }
             });
 
-            logoutButton.addEventListener('click', function(e) {
-    e.preventDefault(); // Evita que siga el href
-    handleLogout(); // Llama a la función
-});
+            logoutButton.addEventListener('click', function (e) {
+                e.preventDefault(); // Evita que siga el href
+                handleLogout(); // Llama a la función
+            });
 
             const token = getCookie("token");
 
@@ -209,6 +345,21 @@
             document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
             // Redirige al login
             window.location.href = '/index.html';
+        }
+
+        function toggleAddUserPopup() {
+            const popup = document.getElementById("addUserPopup");
+            const overlay = document.getElementById("overlay");
+
+            const isVisible = popup.style.display === "block";
+
+            if (isVisible) {
+                popup.style.display = "none";
+                overlay.style.display = "none";
+            } else {
+                popup.style.display = "block";
+                overlay.style.display = "block";
+            }
         }
     </script>
 </body>

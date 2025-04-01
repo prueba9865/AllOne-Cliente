@@ -394,6 +394,160 @@ button:hover {
   display: inline-block;
 }
 
+/* Botón Agregar Gente */
+.add-people-btn {
+  position: fixed;
+  top: 20px;
+  right: 80px; /* A la izquierda de la foto */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.add-people-btn:hover {
+  background: #4338ca;
+  transform: scale(1.1);
+}
+
+.add-people-btn i {
+  font-size: 1.2rem;
+}
+
+/* Popup de búsqueda */
+.search-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.search-popup.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.popup-content {
+  background: white;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.search-popup.active .popup-content {
+  transform: translateY(0);
+}
+
+.popup-header {
+  padding: 20px;
+  background: #4f46e5;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popup-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.close-popup {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.search-container {
+  padding: 20px;
+}
+
+/* Resultados de búsqueda */
+.search-results {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: 1px solid #e0e7ff;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-card:hover {
+  background: #f5f7ff;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+  border: 2px solid #e0e7ff;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #4f46e5;
+  margin-bottom: 3px;
+}
+
+.user-username {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.add-btn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+  background: #4338ca;
+}
+
 @keyframes fadeInDropdown {
   from {
     opacity: 0;
