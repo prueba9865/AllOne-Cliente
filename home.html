@@ -30,6 +30,7 @@
 
     <!-- Popup de búsqueda -->
     <div class="search-popup" id="searchPopup">
+        <div id="mensaje" class="mensaje"></div>
         <div class="popup-content">
             <div class="popup-header">
                 <h3>Agregar nuevo contacto</h3>
@@ -38,8 +39,7 @@
             <div class="search-container">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="userSearchInput" placeholder="Buscar..."
-                        class="search-input">
+                    <input type="text" id="userSearchInput" placeholder="Buscar..." class="search-input">
                 </div>
                 <div class="search-results" id="userSearchResults"></div>
             </div>
@@ -143,47 +143,40 @@
                 searchPopup.classList.remove('active');
             });
 
-            // Buscar usuarios (simulación)
+            let searchTimeout;
+
             userSearchInput.addEventListener('input', function (e) {
                 const query = e.target.value.trim();
+                clearTimeout(searchTimeout); // Cancela el timeout anterior
 
                 if (query.length > 0) {
-                    // Simulación de búsqueda - reemplazar con llamada a tu API
-                    simulateUserSearch(query);
+                    searchTimeout = setTimeout(() => {
+                        searchUsers(query);
+                    }, 300); // Espera 300ms después de la última tecla
                 } else {
                     userSearchResults.innerHTML = '';
                 }
             });
 
-            function simulateUserSearch(query) {
-                // Datos de ejemplo - reemplazar con tu API real
-                const mockUsers = [
-                    {
-                        id: 1,
-                        name: "María González",
-                        username: "maria_g",
-                        avatar: "https://randomuser.me/api/portraits/women/44.jpg"
-                    },
-                    {
-                        id: 2,
-                        name: "Carlos López",
-                        username: "carlos_tech",
-                        avatar: "https://randomuser.me/api/portraits/men/32.jpg"
-                    },
-                    {
-                        id: 3,
-                        name: "Ana Martínez",
-                        username: "ana_design",
-                        avatar: "https://randomuser.me/api/portraits/women/63.jpg"
-                    }
-                ];
-
-                const filteredUsers = mockUsers.filter(user =>
-                    user.name.toLowerCase().includes(query.toLowerCase()) ||
-                    user.username.toLowerCase().includes(query.toLowerCase())
-                );
-
-                displaySearchResults(filteredUsers);
+            // Función que busca usuarios en el backend
+            function searchUsers(query) {
+                fetch("http://localhost:8080/usuarios")
+                    .then(response => {
+                        if (!response.ok) throw new Error("Error al cargar usuarios");
+                        return response.json();
+                    })
+                    .then(users => {
+                        // Filtra los usuarios según el query
+                        const filteredUsers = users.filter(user =>
+                            user.name.toLowerCase().includes(query.toLowerCase()) ||
+                            user.username.toLowerCase().includes(query.toLowerCase())
+                        );
+                        displaySearchResults(filteredUsers); // Muestra los resultados
+                    })
+                    .catch(error => {
+                        console.error("Error en la búsqueda:", error);
+                        userSearchResults.innerHTML = '<div class="no-results">Error al buscar usuarios</div>';
+                    });
             }
 
             function displaySearchResults(users) {
@@ -211,6 +204,7 @@
                         e.stopPropagation();
                         console.log('Usuario agregado:', user.id);
                         // Aquí iría tu lógica para agregar el usuario
+                        mostrarMensaje("Solicitud de amistad enviada", "exito")
                     });
 
                     userSearchResults.appendChild(userCard);
@@ -227,12 +221,12 @@
             // Estilo para "no hay resultados"
             const style = document.createElement('style');
             style.textContent = `
-    .no-results {
-        padding: 20px;
-        text-align: center;
-        color: #6b7280;
-    }
-`;
+                .no-results {
+                    padding: 20px;
+                    text-align: center;
+                    color: #6b7280;
+                }
+            `;
             document.head.appendChild(style);
 
             const profileAvatar = document.getElementById('profileAvatar');
@@ -360,6 +354,18 @@
                 popup.style.display = "block";
                 overlay.style.display = "block";
             }
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const contenedorMensaje = document.getElementById("mensaje");
+            contenedorMensaje.textContent = mensaje;
+            contenedorMensaje.className = `mensaje ${tipo}`; // Aplica la clase de estilo
+            contenedorMensaje.style.display = "block"; // Muestra el mensaje
+
+            // Opcional: Ocultar el mensaje después de unos segundos
+            setTimeout(() => {
+                contenedorMensaje.style.display = "none";
+            }, 5000); // 5 segundos
         }
     </script>
 </body>
