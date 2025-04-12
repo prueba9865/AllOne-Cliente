@@ -59,6 +59,33 @@
         </div>
     </div>
 
+    <!-- Añade esto junto a los otros popups -->
+    <div class="all-requests-popup" id="allRequestsPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Todas mis solicitudes</h3>
+                <button class="close-popup" id="closeAllRequestsPopup">&times;</button>
+            </div>
+            <div class="requests-tabs">
+                <button class="tab-button active" data-tab="received">Recibidas</button>
+                <button class="tab-button" data-tab="sent">Enviadas</button>
+            </div>
+            <div class="all-requests-list" id="allRequestsList">
+                <!-- Las solicitudes se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modifica el icono de notificaciones para incluir un menú desplegable -->
+    <div class="notification-bell" id="notificationBell">
+        <i class="fas fa-bell"></i>
+        <span class="notification-count" id="notificationCount">0</span>
+        <div class="notification-dropdown" id="notificationDropdown">
+            <a href="#" id="viewPendingRequests"><i class="fas fa-clock"></i> Ver pendientes</a>
+            <a href="#" id="viewAllRequests"><i class="fas fa-list"></i> Ver todas</a>
+        </div>
+    </div>
+
 
     <div class="tabs">
         <button class="tab-button" data-tab="reels">Reels</button>
@@ -137,12 +164,9 @@
             </div>
         </div>
     </div>
-    <!-- Icono de notificaciones (nuevo) -->
-    <div class="notification-bell" id="notificationBell">
-        <i class="fas fa-bell"></i>
-        <span class="notification-count" id="notificationCount">0</span>
-    </div>
     <script>
+        let currentUserId = null;
+        let friendRequestsInterval = null;
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del popup
             const addPeopleBtn = document.getElementById('addPeopleBtn');
@@ -150,6 +174,38 @@
             const closePopup = document.getElementById('closePopup');
             const userSearchInput = document.getElementById('userSearchInput');
             const userSearchResults = document.getElementById('userSearchResults');
+
+            // Añade estas variables al inicio de tu script
+            const allRequestsPopup = document.getElementById('allRequestsPopup');
+            const closeAllRequestsPopup = document.getElementById('closeAllRequestsPopup');
+            const allRequestsList = document.getElementById('allRequestsList');
+            const viewPendingRequests = document.getElementById('viewPendingRequests');
+            const viewAllRequests = document.getElementById('viewAllRequests');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+
+            // Evento para mostrar todas las solicitudes
+            viewAllRequests?.addEventListener('click', (e) => {
+                e.preventDefault();
+                requestsPopup.classList.remove('active');
+                allRequestsPopup.classList.add('active');
+                loadAllFriendRequests('received'); // Carga las recibidas por defecto
+            });
+
+            // Evento para cerrar el popup
+            closeAllRequestsPopup?.addEventListener('click', () => {
+                allRequestsPopup.classList.remove('active');
+            });
+
+            // Cambio entre pestañas
+            document.querySelectorAll('.requests-tabs .tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.requests-tabs .tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    button.classList.add('active');
+                    loadAllFriendRequests(button.dataset.tab);
+                });
+            });
 
             // Mostrar popup
             addPeopleBtn.addEventListener('click', () => {
@@ -324,42 +380,53 @@
                 return;
             }
 
-            fetch("http://localhost:8080/decode-jwt", {
-                method: "GET",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache',
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include'
-            })
-                .then(response => {
+            // Función para obtener y establecer el ID del usuario
+            const initializeUser = async () => {
+                try {
+                    const response = await fetch("http://localhost:8080/decode-jwt", {
+                        method: "GET",
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Cache-Control': 'no-cache',
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+
                     if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
+                        throw new Error(await response.text());
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    // Asignar el id del usuario a la variable global
-                    window.currentUserId = data.id;
-                    loadFriendRequests(); // Carga inicial
-                    setInterval(loadFriendRequests, 30000); // Refresco periódico
-                    console.log("El avatar es: " + data.avatar);
+
+                    const data = await response.json();
+                    currentUserId = data.id;
+                    console.log("Usuario ID obtenido:", currentUserId);
+
+                    // Configurar avatar
                     if (data.avatar) {
                         profileAvatar.style.backgroundImage = `url(${data.avatar})`;
                     } else {
                         profileAvatar.style.backgroundImage = 'url(https://www.gravatar.com/avatar/default?s=200)';
                         profileAvatar.style.backgroundColor = getRandomColor();
                     }
-                    // Una vez obtenido el ID, se pueden cargar las solicitudes pendientes
-                    loadFriendRequests();
-                    // Inicia el intervalo para refrescar las solicitudes, si lo deseas
+
+                    //currentUserId = 2
+
+                    // Cargar solicitudes ahora que tenemos el ID
+                    await loadFriendRequests();
+
+                    // Iniciar intervalo de refresco
                     setInterval(loadFriendRequests, 30000);
-                })
-                .catch(error => {
+
+                } catch (error) {
                     console.error("Error en la petición:", error);
-                    if (error.message.includes("401")) window.location.href = "/index.html";
-                });
+                    if (error.message.includes("401")) {
+                        window.location.href = "/index.html";
+                    }
+                }
+            };
+
+            // Inicializar usuario
+            initializeUser();
 
 
         });
@@ -422,7 +489,7 @@
 
         // Mostrar popup de solicitudes
         notificationBell.addEventListener('click', () => {
-            if (!window.currentUserId) {
+            if (!currentUserId) {
                 console.error("ID de usuario no disponible");
                 return;
             }
@@ -435,15 +502,115 @@
             requestsPopup.classList.remove('active');
         });
 
-        // Cargar solicitudes pendientes
-        async function loadFriendRequests() {
-            /*if (!window.currentUserId) {
-                console.log("Esperando ID de usuario...");
+        // Función para cargar todas las solicitudes (recibidas y enviadas)
+        async function loadAllFriendRequests(type = 'received') {
+            if (!currentUserId) {
+                console.error("ID de usuario no disponible");
                 return;
-            }*/
+            }
 
             try {
-                const response = await fetch(`http://localhost:8080/usuarios/2/solicitudes-pendientes`);
+                allRequestsList.innerHTML = '<div class="loading">Cargando...</div>';
+
+                const endpoint = type === 'received'
+                    ? `usuarios/${currentUserId}/solicitudes-pendientes`
+                    : `usuarios/${currentUserId}/solicitudes-enviadas`;
+
+                const response = await fetch(`http://localhost:8080/${endpoint}`);
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const solicitudes = await response.json();
+                renderAllRequests(solicitudes, type);
+
+            } catch (error) {
+                console.error("Error al cargar todas las solicitudes:", error);
+                allRequestsList.innerHTML = '<div class="error-msg">Error al cargar solicitudes</div>';
+            }
+        }
+
+        // Función para renderizar todas las solicitudes
+        function renderAllRequests(solicitudes, type) {
+            allRequestsList.innerHTML = '';
+
+            if (!solicitudes || solicitudes.length === 0) {
+                allRequestsList.innerHTML = `
+            <div class="no-requests">
+                No tienes solicitudes ${type === 'received' ? 'recibidas' : 'enviadas'}
+            </div>
+        `;
+                return;
+            }
+
+            solicitudes.forEach(solicitud => {
+                const requestItem = document.createElement('div');
+                requestItem.className = 'request-history-item';
+
+                if (type === 'received') {
+                    requestItem.innerHTML = `
+                <img src="${solicitud.avatar || 'https://www.gravatar.com/avatar/default?s=200'}" 
+                     class="user-avatar">
+                <div class="user-info">
+                    <div class="user-name">${solicitud.name || solicitud.nombre || 'Usuario'}</div>
+                    <div class="user-username">@${solicitud.username || 'usuario'}</div>
+                </div>
+                <div class="request-actions">
+                    <button class="accept-btn" data-id="${solicitud.id || solicitud.solicitudId}">✓</button>
+                    <button class="reject-btn" data-id="${solicitud.id || solicitud.solicitudId}">✗</button>
+                </div>
+            `;
+
+                    // Manejar aceptar/rechazar
+                    requestItem.querySelector('.accept-btn')?.addEventListener('click', async (e) => {
+                        const solicitudId = e.target.getAttribute('data-id');
+                        await respondToRequest(solicitudId, true);
+                        loadAllFriendRequests('received');
+                    });
+
+                    requestItem.querySelector('.reject-btn')?.addEventListener('click', async (e) => {
+                        const solicitudId = e.target.getAttribute('data-id');
+                        await respondToRequest(solicitudId, false);
+                        loadAllFriendRequests('received');
+                    });
+
+                } else {
+                    // Para solicitudes enviadas (solo visualización)
+                    requestItem.innerHTML = `
+                <img src="${solicitud.avatar || 'https://www.gravatar.com/avatar/default?s=200'}" 
+                     class="user-avatar">
+                <div class="user-info">
+                    <div class="user-name">${solicitud.name || solicitud.nombre || 'Usuario'}</div>
+                    <div class="user-username">@${solicitud.username || 'usuario'}</div>
+                </div>
+                <div class="status ${solicitud.aceptado ? 'accepted' : 'pending'}">
+                    ${solicitud.aceptado ? 'Aceptada' : 'Pendiente'}
+                </div>
+            `;
+                }
+
+                allRequestsList.appendChild(requestItem);
+            });
+        }
+
+        // Cargar solicitudes pendientes
+        async function loadFriendRequests() {
+            // Mostrar estado de carga
+            if (requestsList) {
+                requestsList.innerHTML = '<div class="loading">Cargando solicitudes...</div>';
+            }
+
+            if (!currentUserId) {
+                console.error("currentUserId no está definido");
+                if (requestsList) {
+                    requestsList.innerHTML = '<div class="no-requests">Error: No se pudo identificar al usuario</div>';
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8080/usuarios/${currentUserId}/solicitudes-pendientes`);
 
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
@@ -456,7 +623,9 @@
                 renderRequests(solicitudes);
             } catch (error) {
                 console.error("Error al cargar solicitudes:", error);
-                requestsList.innerHTML = '<div class="no-requests">Error al cargar solicitudes</div>';
+                if (requestsList) {
+                    requestsList.innerHTML = '<div class="no-requests">Error al cargar solicitudes</div>';
+                }
             }
         }
 
