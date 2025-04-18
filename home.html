@@ -279,7 +279,7 @@
                     userCard.querySelector('.add-btn').addEventListener('click', async (e) => {
                         const userId = e.target.getAttribute('data-user-id');
                         try {
-                            const response = await fetch(`http://localhost:8080/usuarios/1/agregar-contacto/${userId}`, {
+                            const response = await fetch(`http://localhost:8080/usuarios/${currentUserId}/agregar-contacto/${userId}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' }
                             });
@@ -411,6 +411,7 @@
 
                     //currentUserId = 2
 
+                    await loadUserContacts();
                     // Cargar solicitudes ahora que tenemos el ID
                     await loadFriendRequests();
 
@@ -441,6 +442,11 @@
                 }
             }
             return null; // Si no encuentra la cookie
+        }
+
+        function showChatList() {
+            document.querySelector('.chat-list-view').classList.add('active');
+            document.querySelector('.chat-detail-view').classList.remove('active');
         }
 
         // Función para manejar el logout
@@ -709,6 +715,86 @@
             } else {
                 notificationBell.classList.remove('has-notifications');
             }
+        }
+
+        // Función para cargar los contactos del usuario
+        async function loadUserContacts() {
+            if (!currentUserId) {
+                console.error("ID de usuario no disponible");
+                return;
+            }
+
+            try {
+                const chatList = document.getElementById("chatList");
+                chatList.innerHTML = '<div class="loading">Cargando contactos...</div>';
+
+                console.log(currentUserId)
+
+                const response = await fetch(`http://localhost:8080/usuarios/${currentUserId}/contactos`);
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const contactos = await response.json();
+                console.log(contactos)
+                renderContactList(contactos);
+
+            } catch (error) {
+                console.error("Error al cargar contactos:", error);
+                const chatList = document.getElementById("chatList");
+                chatList.innerHTML = '<div class="error-msg">Error al cargar contactos</div>';
+            }
+        }
+
+        // Función para renderizar la lista de contactos
+        function renderContactList(contactos) {
+            const chatList = document.getElementById("chatList");
+            chatList.innerHTML = '';
+
+            if (!contactos || contactos.length === 0) {
+                chatList.innerHTML = `
+            <div class="no-contacts">
+                No tienes contactos aún. Agrega amigos para chatear.
+            </div>
+        `;
+                return;
+            }
+
+            contactos.forEach(contacto => {
+                const contactItem = document.createElement('div');
+                contactItem.className = 'chat-item';
+                contactItem.innerHTML = `
+            <img src="${contacto.avatar || 'https://www.gravatar.com/avatar/default?s=200'}" 
+                 class="chat-avatar">
+            <div class="chat-info">
+                <span class="chat-name">${contacto.name}</span>
+                <span class="chat-last-msg">@${contacto.username}</span>
+            </div>
+        `;
+
+                // Evento para iniciar chat
+                contactItem.addEventListener('click', () => {
+                    startChatWithContact(contacto);
+                });
+
+                chatList.appendChild(contactItem);
+            });
+        }
+
+        // Función para iniciar chat con un contacto
+        function startChatWithContact(contacto) {
+            // Oculta la lista de chats y muestra el chat individual
+            document.querySelector('.chat-list-view').classList.remove('active');
+            document.querySelector('.chat-detail-view').classList.add('active');
+
+            // Actualiza la información del chat
+            const chatHeader = document.querySelector('.chat-detail-view .chat-header');
+            chatHeader.querySelector('.profile-pic').src = contacto.avatar || 'https://www.gravatar.com/avatar/default?s=200';
+            chatHeader.querySelector('.chat-name').textContent = contacto.name;
+
+            // Aquí podrías cargar los mensajes existentes con este contacto
+            loadChatMessages(contacto.id);
         }
 
         // Cerrar popup al hacer clic fuera
