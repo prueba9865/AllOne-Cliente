@@ -166,6 +166,8 @@
     </div>
     <script>
         let currentUserId = null;
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
         let friendRequestsInterval = null;
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del popup
@@ -747,6 +749,64 @@
             }
         }
 
+        async function loadChatMessages(chatId) {
+            currentChatId = chatId;
+            messagesContainer.innerHTML = '';              // Limpia mensajes anteriores
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/chats/${chatId}/messages`);
+                if (!res.ok) throw new Error(res.status);
+                const mensajes = await res.json();
+
+                mensajes.forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = 'message ' + (m.usuario.id === currentUserId ? 'mine' : 'theirs');
+                    div.textContent = m.contenido;              // Puedes ampliar según m.tipo
+                    messagesContainer.appendChild(div);
+                });
+
+                // Scroll al final
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (err) {
+                console.error('Error cargando mensajes:', err);
+            }
+        }
+
+        async function sendMessage() {
+            const texto = messageInput.value.trim();
+            if (!texto || !currentChatId) return;
+
+            const dto = {
+                contenido: texto,
+                tipo: 'texto',
+                usuarioId: currentUserId,
+                usuarioGoogleId: null    // o tu variable si usas Google ID
+            };
+
+            try {
+                const res = await fetch(`http://localhost:8080/api/chats/${currentChatId}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                });
+                if (!res.ok) throw new Error(res.status);
+                const nuevo = await res.json();
+
+                // Inserta inmediatamente en DOM
+                const div = document.createElement('div');
+                div.className = 'message mine';
+                div.textContent = nuevo.contenido;
+                messagesContainer.appendChild(div);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                messageInput.value = '';
+            } catch (err) {
+                console.error('Error enviando mensaje:', err);
+            }
+        }
+
+
+
         // Función para renderizar la lista de contactos
         function renderContactList(contactos) {
             const chatList = document.getElementById("chatList");
@@ -765,10 +825,10 @@
                 const contactItem = document.createElement('div');
                 contactItem.className = 'chat-item';
                 contactItem.innerHTML = `
-            <img src="${contacto.avatar || 'https://www.gravatar.com/avatar/default?s=200'}" 
+            <img src="${"http://localhost:8080/uploads/avatars/" + contacto.avatar || 'https://www.gravatar.com/avatar/default?s=200'}" 
                  class="chat-avatar">
             <div class="chat-info">
-                <span class="chat-name">${contacto.name}</span>
+                <span class="chat-name">${contacto.nombre}</span>
                 <span class="chat-last-msg">@${contacto.username}</span>
             </div>
         `;
@@ -782,27 +842,32 @@
             });
         }
 
-        // Función para iniciar chat con un contacto
         function startChatWithContact(contacto) {
-            // Oculta la lista de chats y muestra el chat individual
+            // 1. Mostrar el objeto contacto completo en la consola (para depuración)
+            //console.log("Datos completos del contacto:", JSON.stringify(contacto, null, 2));
+
+            // 2. Mostrar propiedades individuales (opcional)
+            //console.log(`ID: ${contacto.username} | Nombre: ${contacto.name} | Avatar: ${contacto.avatar}`);
+
+            // 3. Oculta la lista de chats y muestra el chat individual
             document.querySelector('.chat-list-view').classList.remove('active');
             document.querySelector('.chat-detail-view').classList.add('active');
 
-            // Actualiza la información del chat
+            // 4. Actualiza la información del chat con comprobación de datos
             const chatHeader = document.querySelector('.chat-detail-view .chat-header');
-            chatHeader.querySelector('.profile-pic').src = contacto.avatar || 'https://www.gravatar.com/avatar/default?s=200';
-            chatHeader.querySelector('.chat-name').textContent = contacto.name;
 
-            // Aquí podrías cargar los mensajes existentes con este contacto
+            // - Avatar (con ruta completa y fallback)
+            const avatarUrl = contacto.avatar
+                ? `http://localhost:8080/uploads/avatars/${contacto.avatar}`
+                : 'https://www.gravatar.com/avatar/default?s=200';
+            chatHeader.querySelector('.profile-pic').src = avatarUrl;
+
+            // - Nombre (con valor por defecto)
+            chatHeader.querySelector('.chat-name').textContent = contacto.username || 'Usuario sin nombre';
+
+            // 5. Cargar mensajes
             loadChatMessages(contacto.id);
         }
-
-        // Cerrar popup al hacer clic fuera
-        requestsPopup.addEventListener('click', (e) => {
-            if (e.target === requestsPopup) {
-                requestsPopup.classList.remove('active');
-            }
-        });
     </script>
 </body>
 
