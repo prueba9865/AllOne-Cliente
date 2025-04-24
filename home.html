@@ -36,10 +36,21 @@
         </div>
     </div>
 
+    <!-- Botón para crear chat -->
+    <div class="create-chat-btn" id="createChatBtn" style="left: 20px;">
+        <i class="fas fa-comments"></i>
+    </div>
+
+    <!-- Botón para crear grupo -->
+    <div class="create-group-btn" id="createGroupBtn" style="left: 70px;">
+        <i class="fas fa-users"></i>
+    </div>
+
     <!-- Botón para agregar gente -->
-    <div class="add-people-btn" id="addPeopleBtn">
+    <div class="add-people-btn" id="addPeopleBtn" style="left: 120px;">
         <i class="fas fa-user-plus"></i>
     </div>
+
 
     <!-- Popup de búsqueda -->
     <div class="search-popup" id="searchPopup">
@@ -172,6 +183,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Elementos del popup
             const addPeopleBtn = document.getElementById('addPeopleBtn');
+            const addChat = document.getElementById('createChatBtn');
             const searchPopup = document.getElementById('searchPopup');
             const closePopup = document.getElementById('closePopup');
             const userSearchInput = document.getElementById('userSearchInput');
@@ -212,6 +224,10 @@
             // Mostrar popup
             addPeopleBtn.addEventListener('click', () => {
                 searchPopup.classList.add('active');
+            });
+
+            addChat.addEventListener('click', () => {
+                alert("añadir un chat de usuario");
             });
 
             // Ocultar popup
@@ -842,32 +858,39 @@
             });
         }
 
-        function startChatWithContact(contacto) {
-            // 1. Mostrar el objeto contacto completo en la consola (para depuración)
-            //console.log("Datos completos del contacto:", JSON.stringify(contacto, null, 2));
+        async function startChatWithContact(contacto) {
+            // 0) Obtener/crear chat one-to-one
+            const resChat = await fetch('http://localhost:8080/api/chats/one-on-one', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usuarioId: currentUserId,
+                    contactoId: contacto.id
+                })
+            });
+            if (!resChat.ok) {
+                console.error('No se pudo crear/obtener el chat', resChat.status);
+                return;
+            }
+            const chat = await resChat.json();
+            currentChatId = chat.id;
 
-            // 2. Mostrar propiedades individuales (opcional)
-            //console.log(`ID: ${contacto.username} | Nombre: ${contacto.name} | Avatar: ${contacto.avatar}`);
-
-            // 3. Oculta la lista de chats y muestra el chat individual
+            // 1) Oculta lista / muestra detalle
             document.querySelector('.chat-list-view').classList.remove('active');
             document.querySelector('.chat-detail-view').classList.add('active');
 
-            // 4. Actualiza la información del chat con comprobación de datos
-            const chatHeader = document.querySelector('.chat-detail-view .chat-header');
-
-            // - Avatar (con ruta completa y fallback)
+            // 2) Actualiza cabecera
+            const chatHeader = document.querySelector('.chat-header');
             const avatarUrl = contacto.avatar
                 ? `http://localhost:8080/uploads/avatars/${contacto.avatar}`
                 : 'https://www.gravatar.com/avatar/default?s=200';
             chatHeader.querySelector('.profile-pic').src = avatarUrl;
-
-            // - Nombre (con valor por defecto)
             chatHeader.querySelector('.chat-name').textContent = contacto.username || 'Usuario sin nombre';
 
-            // 5. Cargar mensajes
-            loadChatMessages(contacto.id);
+            // 3) Carga mensajes del chat
+            await loadChatMessages(currentChatId);
         }
+
     </script>
 </body>
 

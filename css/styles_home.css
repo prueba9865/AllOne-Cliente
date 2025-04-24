@@ -1036,6 +1036,29 @@ button:hover {
   background: #f8fafc;
 }
 
+.create-chat-btn,
+.create-group-btn,
+.add-people-btn {
+    position: fixed;
+    bottom: 30px;
+    background-color: #4f46e5;
+    color: white;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: background-color 0.3s;
+}
+
+.create-chat-btn:hover,
+.create-group-btn:hover,
+.add-people-btn:hover {
+    background-color: #4f46e5;
+    transform: scale(1.05);
+}
+
+
 @keyframes fadeInDropdown {
   from {
     opacity: 0;
