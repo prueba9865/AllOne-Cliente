@@ -176,6 +176,7 @@
         </div>
     </div>
     <script>
+        let currentContactId = null;
         let currentUserId = null;
         const messagesContainer = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
@@ -765,12 +766,12 @@
             }
         }
 
-        async function loadChatMessages(chatId) {
+        async function loadChatMessages() {
             currentChatId = chatId;
             messagesContainer.innerHTML = '';              // Limpia mensajes anteriores
 
             try {
-                const res = await fetch(`http://localhost:8080/api/chats/${chatId}/messages`);
+                const res = await fetch(`http://localhost:8080/api/user/${currentUserId}/messages`);
                 if (!res.ok) throw new Error(res.status);
                 const mensajes = await res.json();
 
@@ -789,7 +790,8 @@
         }
 
         async function sendMessage() {
-            const texto = messageInput.value.trim();
+            console.log("El contacto id es: " + currentContactId)
+            /*const texto = messageInput.value.trim();
             if (!texto || !currentChatId) return;
 
             const dto = {
@@ -818,7 +820,7 @@
                 messageInput.value = '';
             } catch (err) {
                 console.error('Error enviando mensaje:', err);
-            }
+            }*/
         }
 
 
@@ -858,9 +860,10 @@
             });
         }
 
-        async function startChatWithContact(contacto) {
+        function startChatWithContact(contacto) {
+            currentContactId = contacto.id;
             // 0) Obtener/crear chat one-to-one
-            const resChat = await fetch('http://localhost:8080/api/chats/one-on-one', {
+            /*const resChat = await fetch('http://localhost:8080/api/chats/one-on-one', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -887,8 +890,8 @@
             chatHeader.querySelector('.profile-pic').src = avatarUrl;
             chatHeader.querySelector('.chat-name').textContent = contacto.username || 'Usuario sin nombre';
 
-            // 3) Carga mensajes del chat
-            await loadChatMessages(currentChatId);
+            // 3) Carga mensajes del chat*/
+            loadChatMessages(currentUserId);
         }
 
     </script>
