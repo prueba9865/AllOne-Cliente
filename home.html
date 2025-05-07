@@ -767,18 +767,29 @@
         }
 
         async function loadChatMessages() {
-            currentChatId = chatId;
-            messagesContainer.innerHTML = '';              // Limpia mensajes anteriores
+            messagesContainer.innerHTML = ''; // Limpia mensajes anteriores
 
             try {
-                const res = await fetch(`http://localhost:8080/api/user/${currentUserId}/messages`);
-                if (!res.ok) throw new Error(res.status);
+                const res = await fetch(`http://localhost:8080/api/user/${currentUserId}/${currentContactId}/messages`);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const mensajes = await res.json();
+                console.log("Ejemplo de mensaje:", mensajes[0]); // ← Verifica la propiedad del usuario
 
                 mensajes.forEach(m => {
                     const div = document.createElement('div');
-                    div.className = 'message ' + (m.usuario.id === currentUserId ? 'mine' : 'theirs');
-                    div.textContent = m.contenido;              // Puedes ampliar según m.tipo
+                    div.className = 'message ' + (m.usuarioId === currentUserId ? 'mine' : 'theirs');
+
+                    // Crear elemento para el contenido del mensaje
+                    const content = document.createElement('p');
+                    content.textContent = m.contenido;
+                    div.appendChild(content);
+
+                    // Opcional: agregar fecha/hora
+                    const time = document.createElement('span');
+                    time.className = 'message-time';
+                    time.textContent = new Date(m.createdAt).toLocaleTimeString();
+                    div.appendChild(time);
+
                     messagesContainer.appendChild(div);
                 });
 
@@ -786,42 +797,62 @@
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             } catch (err) {
                 console.error('Error cargando mensajes:', err);
+                // Opcional: mostrar mensaje de error al usuario
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = 'No se pudieron cargar los mensajes';
+                messagesContainer.appendChild(errorDiv);
             }
         }
 
         async function sendMessage() {
-            console.log("El contacto id es: " + currentContactId)
-            /*const texto = messageInput.value.trim();
-            if (!texto || !currentChatId) return;
+            const texto = messageInput.value.trim();
+            if (!texto) return;
 
             const dto = {
                 contenido: texto,
                 tipo: 'texto',
                 usuarioId: currentUserId,
-                usuarioGoogleId: null    // o tu variable si usas Google ID
+                contactoId: currentContactId
             };
 
             try {
-                const res = await fetch(`http://localhost:8080/api/chats/${currentChatId}/messages`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dto)
-                });
+                const res = await fetch(
+                    `http://localhost:8080/api/user/${currentUserId}/${currentContactId}/messages`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dto)
+                    }
+                );
                 if (!res.ok) throw new Error(res.status);
                 const nuevo = await res.json();
 
-                // Inserta inmediatamente en DOM
+                // --- CREACIÓN DEL DIV COMO EN loadChatMessages ---
                 const div = document.createElement('div');
                 div.className = 'message mine';
-                div.textContent = nuevo.contenido;
+
+                // Contenido
+                const content = document.createElement('p');
+                content.textContent = nuevo.contenido;
+                div.appendChild(content);
+
+                // Hora
+                const time = document.createElement('span');
+                time.className = 'message-time';
+                time.textContent = new Date(nuevo.createdAt).toLocaleTimeString();
+                div.appendChild(time);                  // <— ¡Ojo aquí, lo insertas en el div!
+
+                // Ahora sí, lo añades al contenedor
                 messagesContainer.appendChild(div);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
                 messageInput.value = '';
             } catch (err) {
                 console.error('Error enviando mensaje:', err);
-            }*/
+            }
         }
+
 
 
 
@@ -860,29 +891,22 @@
             });
         }
 
-        function startChatWithContact(contacto) {
+        async function startChatWithContact(contacto) {
             currentContactId = contacto.id;
-            // 0) Obtener/crear chat one-to-one
-            /*const resChat = await fetch('http://localhost:8080/api/chats/one-on-one', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    usuarioId: currentUserId,
-                    contactoId: contacto.id
-                })
-            });
-            if (!resChat.ok) {
-                console.error('No se pudo crear/obtener el chat', resChat.status);
+            const response = await fetch(`http://localhost:8080/api/user/${currentUserId}/${currentContactId}/messages`);
+
+            if (!response.ok) {
+                console.error('No se pudo cargar/obtener los mensajes', response.status);
                 return;
             }
-            const chat = await resChat.json();
-            currentChatId = chat.id;
 
-            // 1) Oculta lista / muestra detalle
+            const mensajes = await response.json(); // <-- Aquí extraes los datos JSON
+            //console.log(mensajes); // <-- Ahora verás el array []
+
+            // Resto de tu código...
             document.querySelector('.chat-list-view').classList.remove('active');
             document.querySelector('.chat-detail-view').classList.add('active');
 
-            // 2) Actualiza cabecera
             const chatHeader = document.querySelector('.chat-header');
             const avatarUrl = contacto.avatar
                 ? `http://localhost:8080/uploads/avatars/${contacto.avatar}`
@@ -890,8 +914,7 @@
             chatHeader.querySelector('.profile-pic').src = avatarUrl;
             chatHeader.querySelector('.chat-name').textContent = contacto.username || 'Usuario sin nombre';
 
-            // 3) Carga mensajes del chat*/
-            loadChatMessages(currentUserId);
+            loadChatMessages();
         }
 
     </script>
