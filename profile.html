@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/styles_profile.css">
+</head>
+
+<body>
+    <div class="section active" id="edit-profile-section">
+        <h2>Editar Perfil</h2>
+
+        <div class="profile-edit-container">
+            <!-- Mensajes de éxito/error -->
+            <div id="mensaje" class="mensaje" style="display: none;"></div>
+
+            <!-- Formulario de edición -->
+            <form id="edit-profile-form" class="edit-form">
+                <!-- Avatar -->
+                <div class="form-group avatar-upload">
+                    <label for="avatar">Foto de perfil</label>
+                    <div class="avatar-preview">
+                        <img id="avatar-preview" src="[ruta-actual-avatar]" alt="Avatar">
+                        <label for="avatar-upload" class="upload-btn">
+                            <i class="fas fa-camera"></i> Cambiar
+                        </label>
+                        <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" value="[nombre-actual]" required>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="[email-actual]" required>
+                </div>
+
+                <!-- Contraseña actual (solo visible si es usuario local) -->
+                <div class="form-group" id="current-password-group">
+                    <label for="antiguaPassword">Contraseña actual</label>
+                    <input type="password" id="antiguaPassword" name="antiguaPassword">
+                    <small>Necesaria para hacer cambios</small>
+                </div>
+
+                <!-- Nueva contraseña -->
+                <div class="form-group password-group">
+                    <label for="password">Nueva contraseña</label>
+                    <input type="password" id="password" name="password">
+                    <div class="password-strength">
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <span class="strength-text">Seguridad: baja</span>
+                    </div>
+                </div>
+
+                <!-- Confirmar nueva contraseña -->
+                <div class="form-group">
+                    <label for="password2">Repetir nueva contraseña</label>
+                    <input type="password" id="password2" name="password2">
+                    <div class="password-match">
+                        <i class="fas fa-check-circle"></i> Las contraseñas coinciden
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn">Cancelar</button>
+                    <button type="submit" class="save-btn">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Preview de avatar
+            const avatarUpload = document.getElementById('avatar-upload');
+            const avatarPreview = document.getElementById('avatar-preview');
+
+            avatarUpload.addEventListener('change', function (e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        avatarPreview.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            // Validación de contraseña
+            const passwordInput = document.getElementById('password');
+            const password2Input = document.getElementById('password2');
+            const passwordMatch = document.querySelector('.password-match');
+            const strengthBars = document.querySelectorAll('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+
+            passwordInput.addEventListener('input', function () {
+                const password = this.value;
+                checkPasswordStrength(password);
+            });
+
+            password2Input.addEventListener('input', function () {
+                if (passwordInput.value === this.value && this.value.length > 0) {
+                    passwordMatch.style.display = 'flex';
+                } else {
+                    passwordMatch.style.display = 'none';
+                }
+            });
+
+            function checkPasswordStrength(password) {
+                let strength = 0;
+
+                // Longitud mínima
+                if (password.length >= 8) strength++;
+                // Contiene números
+                if (password.match(/([0-9])/)) strength++;
+                // Contiene caracteres especiales
+                if (password.match(/([!,%,&,@,#,$,^,*,?,_,~])/)) strength++;
+
+                // Actualizar UI
+                strengthBars.forEach((bar, index) => {
+                    bar.style.background = index < strength ?
+                        (strength === 1 ? '#ef4444' : strength === 2 ? '#f59e0b' : '#10b981') :
+                        '#e0e7ff';
+                });
+
+                strengthText.textContent = `Seguridad: ${strength === 0 ? 'ninguna' :
+                        strength === 1 ? 'baja' :
+                            strength === 2 ? 'media' : 'alta'
+                    }`;
+            }
+
+            // Manejo del formulario
+            const form = document.getElementById('edit-profile-form');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Validaciones adicionales pueden ir aquí
+                if (passwordInput.value && passwordInput.value !== password2Input.value) {
+                    showMessage('Las contraseñas no coinciden', 'error');
+                    return;
+                }
+
+                // Envío del formulario (simulado)
+                showMessage('Perfil actualizado correctamente', 'exito');
+            });
+        });
+
+        function showMessage(text, type) {
+            const mensaje = document.getElementById('mensaje');
+            mensaje.textContent = text;
+            mensaje.className = `mensaje ${type}`;
+            mensaje.style.display = 'block';
+
+            setTimeout(() => {
+                mensaje.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html>
