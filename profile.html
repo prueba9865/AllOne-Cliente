@@ -5,12 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="css/styles_profile.css">
+    <link rel="stylesheet" type="text/css" href="css/styles_profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <div class="section active" id="edit-profile-section">
         <h2>Editar Perfil</h2>
+        <div id="mensaje" class="mensaje"></div>
 
         <div class="profile-edit-container">
             <!-- Mensajes de éxito/error -->
@@ -18,31 +20,43 @@
 
             <!-- Formulario de edición -->
             <form id="edit-profile-form" class="edit-form">
-                <!-- Avatar -->
-                <div class="form-group avatar-upload">
-                    <label for="avatar">Foto de perfil</label>
-                    <div class="avatar-preview">
-                        <img id="avatar-preview" src="[ruta-actual-avatar]" alt="Avatar">
-                        <label for="avatar-upload" class="upload-btn">
-                            <i class="fas fa-camera"></i> Cambiar
-                        </label>
-                        <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-                    </div>
+                <!-- Botón personalizado para subir imagen -->
+                <div class="custom-file-upload" id="imagenAvatar">
+                    <input type="file" name="avatar" id="avatar" />
+                    <label for="avatar">
+                        <span class="icon">+</span>
+                    </label>
                 </div>
 
                 <!-- Nombre -->
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
-                    <input type="text" id="nombre" name="nombre" value="[nombre-actual]" required>
+                    <input type="text" id="nombre" name="nombre" value="[nombre-actual]" class="locked-input" readonly>
+                    <div class="edit-icon" data-target="nombre">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
                 </div>
 
                 <!-- Email -->
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" value="[email-actual]" required>
+                    <input type="email" id="email" name="email" value="[email-actual]" class="locked-input" readonly>
+                    <div class="edit-icon" data-target="email">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
                 </div>
 
-                <!-- Contraseña actual (solo visible si es usuario local) -->
+                <!-- Username -->
+                <div class="form-group">
+                    <label for="username">Nombre de usuario</label>
+                    <input type="text" id="username" name="username" value="[username-actual]" class="locked-input"
+                        readonly>
+                    <div class="edit-icon" data-target="username">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                </div>
+
+                <!-- Contraseña actual -->
                 <div class="form-group" id="current-password-group">
                     <label for="antiguaPassword">Contraseña actual</label>
                     <input type="password" id="antiguaPassword" name="antiguaPassword">
@@ -80,19 +94,91 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Preview de avatar
-            const avatarUpload = document.getElementById('avatar-upload');
-            const avatarPreview = document.getElementById('avatar-preview');
+        const token = getCookie("token");
+        const avatarInput = document.getElementById('avatar');
+        let currentUserId = null;
+        let currentUserData = {}; // Almacenaremos los datos originales del usuario
+        let avatarFileName = null; // Para almacenar el nombre del archivo de avatar
 
-            avatarUpload.addEventListener('change', function (e) {
-                if (e.target.files && e.target.files[0]) {
+        document.addEventListener('DOMContentLoaded', function () {
+            const avatarInput = document.getElementById('avatar');
+            const imagenAvatar = document.getElementById('imagenAvatar');
+            const plusIcon = document.querySelector('.custom-file-upload .icon');
+
+            if (!avatarInput || !imagenAvatar) {
+                console.error('El elemento con ID "avatar" o "imagenAvatar" no se encontró en el DOM.');
+                return;
+            }
+
+            avatarInput.addEventListener('change', function () {
+                const archivo = this.files[0];
+
+                if (archivo) {
                     const reader = new FileReader();
-                    reader.onload = function (event) {
-                        avatarPreview.src = event.target.result;
+
+                    reader.onload = function (e) {
+                        imagenAvatar.style.backgroundImage = `url('${e.target.result}')`;
+                        imagenAvatar.style.backgroundSize = 'cover';
+                        imagenAvatar.style.backgroundPosition = 'center';
+                        imagenAvatar.style.borderRadius = '50%';
+                        document.querySelector(".custom-file-upload label").classList.add("has-image");
                     };
-                    reader.readAsDataURL(e.target.files[0]);
+
+                    reader.readAsDataURL(archivo);
+                    plusIcon.style.opacity = '0.5';
+
+                    // Subir el avatar al servidor
+                    //uploadAvatar(archivo);
                 }
+            });
+
+            // Función para subir el avatar al servidor
+            /*async function uploadAvatar(file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('http://localhost:8080/api/v1/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Error al subir el avatar');
+                    }
+
+                    const data = await response.json();
+                    //avatarFileName = data.fileName; // Guardamos el nombre del archivo
+                    //mostrarMensaje("Avatar actualizado correctamente", "exito")
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarMensaje("Error al subir el avatar", "error")
+                }
+            }*/
+
+            // Habilitar edición solo para los campos con icono de lápiz
+            const editIcons = document.querySelectorAll('.edit-icon');
+            editIcons.forEach(icon => {
+                icon.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+
+                    if (input.classList.contains('locked-input')) {
+                        input.classList.remove('locked-input');
+                        input.classList.add('editing');
+                        input.readOnly = false;
+                        input.focus();
+                        this.innerHTML = '<i class="fas fa-lock"></i>';
+                    } else {
+                        input.classList.add('locked-input');
+                        input.classList.remove('editing');
+                        input.readOnly = true;
+                        this.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                    }
+                });
             });
 
             // Validación de contraseña
@@ -117,15 +203,10 @@
 
             function checkPasswordStrength(password) {
                 let strength = 0;
-
-                // Longitud mínima
                 if (password.length >= 8) strength++;
-                // Contiene números
                 if (password.match(/([0-9])/)) strength++;
-                // Contiene caracteres especiales
                 if (password.match(/([!,%,&,@,#,$,^,*,?,_,~])/)) strength++;
 
-                // Actualizar UI
                 strengthBars.forEach((bar, index) => {
                     bar.style.background = index < strength ?
                         (strength === 1 ? '#ef4444' : strength === 2 ? '#f59e0b' : '#10b981') :
@@ -133,37 +214,271 @@
                 });
 
                 strengthText.textContent = `Seguridad: ${strength === 0 ? 'ninguna' :
-                        strength === 1 ? 'baja' :
-                            strength === 2 ? 'media' : 'alta'
+                    strength === 1 ? 'baja' :
+                        strength === 2 ? 'media' : 'alta'
                     }`;
+            }
+
+            // Función para bloquear todos los campos editables
+            function resetFormToLockedState() {
+                document.querySelectorAll('.edit-icon').forEach(icon => {
+                    const targetId = icon.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    input.classList.add('locked-input');
+                    input.classList.remove('editing');
+                    input.readOnly = true;
+                    icon.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                });
+
+                // Limpiar campos de contraseña
+                document.getElementById('antiguaPassword').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('password2').value = '';
+                passwordMatch.style.display = 'none';
+                strengthText.textContent = 'Seguridad: baja';
+                strengthBars.forEach(bar => {
+                    bar.style.background = '#e0e7ff';
+                });
             }
 
             // Manejo del formulario
             const form = document.getElementById('edit-profile-form');
-            form.addEventListener('submit', function (e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
-                // Validaciones adicionales pueden ir aquí
-                if (passwordInput.value && passwordInput.value !== password2Input.value) {
-                    showMessage('Las contraseñas no coinciden', 'error');
+                // Validaciones frontend antes de enviar
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                const username = document.getElementById('username').value;
+                const antiguaPassword = document.getElementById('antiguaPassword').value;
+                const password = document.getElementById('password').value;
+                const password2 = document.getElementById('password2').value;
+
+                // 1. Validar campos obligatorios
+                if (!nombre) {
+                    mostrarMensaje("El nombre no puede estar en blanco", "error");
                     return;
                 }
 
-                // Envío del formulario (simulado)
-                showMessage('Perfil actualizado correctamente', 'exito');
+                if (!email) {
+                    mostrarMensaje("El email no puede estar en blanco", "error");
+                    return;
+                }
+
+                if (!username) {
+                    mostrarMensaje("El nombre de usuario no puede estar en blanco", "error");
+                    return;
+                }
+
+                // 2. Validar formato del nombre
+                const nombreRegex = /^[A-Za-zñÑáéíóúÁÉÍÓÚ ]{1,50}$/;
+                if (!nombreRegex.test(nombre)) {
+                    mostrarMensaje("El nombre solo puede contener letras y espacios", "error");
+                    return;
+                }
+
+                // 3. Validar formato del email
+                const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
+                if (!emailRegex.test(email)) {
+                    mostrarMensaje("Introduce un email válido", "error");
+                    return;
+                }
+
+                // 4. Validar formato del username
+                const usernameRegex = /^[a-zA-Z0-9_.-]{3,20}$/;
+                if (!usernameRegex.test(username)) {
+                    mostrarMensaje("El username debe tener entre 3 y 20 caracteres y solo puede contener letras, números, puntos, guiones y guiones bajos", "error");
+                    return;
+                }
+
+                // 5. Validar contraseñas (solo si se están cambiando)
+                if (password || password2) {
+                    if (password !== password2) {
+                        mostrarMensaje("Las contraseñas nuevas no coinciden", "error");
+                        return;
+                    }
+
+                    if (password.length < 12) {
+                        mostrarMensaje("La contraseña debe tener mínimo 12 caracteres", "error");
+                        return;
+                    }
+
+                    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+                    if (!passwordRegex.test(password)) {
+                        mostrarMensaje("La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)", "error");
+                        return;
+                    }
+
+                    if (!antiguaPassword) {
+                        mostrarMensaje("Debes ingresar tu contraseña actual para realizar cambios", "error");
+                        return;
+                    }
+                }
+
+                if(!password || !password2 || !antiguaPassword){
+                    mostrarMensaje("Las contraseñas no pueden estar en blanco", "error");
+                    return;
+                }
+
+                if(antiguaPassword == password){
+                    mostrarMensaje("La contraseña nueva no puede ser igual a la que ya tenias", "error");
+                    return;
+                }
+
+                // Mostrar loading
+                const saveBtn = document.querySelector('.save-btn');
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+                try {
+                    // Construir FormData
+                    const fd = new FormData();
+                    fd.append('nombre', nombre);
+                    fd.append('email', email);
+                    fd.append('username', username);
+                    fd.append('antiguaPassword', antiguaPassword || '');
+                    fd.append('password', password || '');
+                    fd.append('password2', password2 || '');
+                    fd.append('tipo', 'local');
+
+                    // Si el usuario seleccionó un nuevo archivo
+                    if (avatarInput.files.length > 0) {
+                        fd.append('avatar', avatarInput.files[0]);
+                    } else {
+                        // Si no, envía el nombre de archivo existente
+                        fd.append('avatar', avatarFileName);
+                    }
+
+                    // Petición PUT
+                    const response = await fetch(
+                        `http://localhost:8080/api/v1/usuario/edit/${currentUserId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: fd
+                    });
+
+                    // Manejar respuesta
+                    if (!response.ok) {
+                        const errorData = await response.json();
+
+                        // Manejar errores de validación del backend
+                        if (errorData.errors) {
+                            // Mostrar el primer error encontrado
+                            const firstError = Object.values(errorData.errors)[0];
+                            mostrarMensaje(firstError, "error");
+                        } else if (errorData.message) {
+                            mostrarMensaje(errorData.message, "error");
+                        } else {
+                            mostrarMensaje("Error al actualizar el perfil", "error");
+                        }
+                        return;
+                    }
+
+                    const data = await response.json();
+                    mostrarMensaje("Perfil actualizado correctamente", "exito");
+                    resetFormToLockedState();
+
+                    // Actualizar datos del usuario después de guardar
+                    await loadUserData();
+
+                } catch (err) {
+                    console.error(err);
+                    mostrarMensaje("Error de conexión con el servidor", "error");
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = 'Guardar cambios';
+                }
             });
         });
 
-        function showMessage(text, type) {
-            const mensaje = document.getElementById('mensaje');
-            mensaje.textContent = text;
-            mensaje.className = `mensaje ${type}`;
-            mensaje.style.display = 'block';
-
-            setTimeout(() => {
-                mensaje.style.display = 'none';
-            }, 5000);
+        function getCookie(name) {
+            const cookies = document.cookie.split('; ');
+            for (const cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
+                }
+            }
+            return null;
         }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const contenedorMensaje = document.getElementById("mensaje");
+            contenedorMensaje.textContent = mensaje;
+            contenedorMensaje.className = `mensaje ${tipo}`; // Aplica la clase de estilo
+            contenedorMensaje.style.display = "block"; // Muestra el mensaje
+
+            // Opcional: Ocultar el mensaje después de unos segundos
+            setTimeout(() => {
+                contenedorMensaje.style.display = "none";
+            }, 5000); // 5 segundos
+        }
+
+        // Función para obtener el ID del usuario desde el JWT
+        const initializeUser = async () => {
+            try {
+                const response = await fetch("http://localhost:8080/decode-jwt", {
+                    method: "GET",
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
+                const data = await response.json();
+                currentUserData = data;
+                currentUserId = data.id;
+
+                const url = data.avatar
+                const match = url.match(/(?<=uploads\/avatars\/)[^\/]+$/);
+                console.log(match[0]);
+                avatarFileName = match[0]
+                console.log("Usuario ID obtenido:", currentUserId);
+
+                // Cargar datos del usuario
+                // Actualizar UI con los datos
+                document.getElementById('nombre').value = data.nombre || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('username').value = data.username || '';
+
+                // Configurar avatar
+                const imagenAvatar = document.getElementById('imagenAvatar');
+                if (data.avatar) {
+                    imagenAvatar.style.backgroundImage = `url('${data.avatar}')`;
+                    imagenAvatar.style.backgroundSize = 'cover';
+                    imagenAvatar.style.backgroundPosition = 'center';
+                    imagenAvatar.style.borderRadius = '50%';
+                    document.querySelector(".custom-file-upload label").classList.add("has-image");
+                } else {
+                    imagenAvatar.style.backgroundImage = 'url(https://www.gravatar.com/avatar/default?s=200)';
+                    imagenAvatar.style.backgroundColor = getRandomColor();
+                }
+
+            } catch (error) {
+                console.error("Error en la petición:", error);
+                if (error.message.includes("401")) {
+                    window.location.href = "/index.html";
+                }
+            }
+        };
+
+        // Inicializar usuario
+        initializeUser();
     </script>
 </body>
 
