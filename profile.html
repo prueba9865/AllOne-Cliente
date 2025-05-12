@@ -11,7 +11,15 @@
 
 <body>
     <div class="section active" id="edit-profile-section">
-        <h2>Editar Perfil</h2>
+        <!-- Navbar simplificado -->
+        <div class="top-nav">
+            <a href="home.html" class="back-link" title="Volver al inicio">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Editar Perfil</h1>
+            <button class="delete-btn" onclick="confirmarEliminacion()">Eliminar cuenta</button>
+        </div>
+
         <div id="mensaje" class="mensaje"></div>
 
         <div class="profile-edit-container">
@@ -315,12 +323,12 @@
                     }
                 }
 
-                if(!password || !password2 || !antiguaPassword){
+                if (!password || !password2 || !antiguaPassword) {
                     mostrarMensaje("Las contraseñas no pueden estar en blanco", "error");
                     return;
                 }
 
-                if(antiguaPassword == password){
+                if (antiguaPassword == password) {
                     mostrarMensaje("La contraseña nueva no puede ser igual a la que ya tenias", "error");
                     return;
                 }
@@ -381,7 +389,7 @@
                     resetFormToLockedState();
 
                     // Actualizar datos del usuario después de guardar
-                    await loadUserData();
+                    //await loadUserData();
 
                 } catch (err) {
                     console.error(err);
@@ -479,6 +487,35 @@
 
         // Inicializar usuario
         initializeUser();
+
+        function confirmarEliminacion() {
+            if (!confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            // Construimos la URL usando currentUserId
+            const url = `http://localhost:8080/api/v1/usuario/delete/${currentUserId}`;
+
+            fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    // Si todo va bien, redirigimos
+                    window.location.href = 'index.html';
+                })
+                .catch(err => {
+                    console.error('Error eliminando la cuenta:', err);
+                    alert('Ha ocurrido un error al eliminar tu cuenta. Inténtalo de nuevo más tarde.');
+                });
+        }
+
     </script>
 </body>
 

@@ -419,13 +419,16 @@
                     currentUserId = data.id;
                     console.log("Usuario ID obtenido:", currentUserId);
 
-                    // Configurar avatar
+                    // Configurar avatar con cache-busting
                     if (data.avatar) {
-                        profileAvatar.style.backgroundImage = `url(${data.avatar})`;
+                        // Le añadimos un timestamp para que la URL sea siempre distinta
+                        const avatarUrl = `${data.avatar}?t=${Date.now()}`;
+                        profileAvatar.style.backgroundImage = `url(${avatarUrl})`;
                     } else {
                         profileAvatar.style.backgroundImage = 'url(https://www.gravatar.com/avatar/default?s=200)';
                         profileAvatar.style.backgroundColor = getRandomColor();
                     }
+
 
                     //currentUserId = 2
 
