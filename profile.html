@@ -254,7 +254,7 @@
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
-                // Validaciones frontend antes de enviar
+                // Obtener valores de los campos
                 const nombre = document.getElementById('nombre').value;
                 const email = document.getElementById('email').value;
                 const username = document.getElementById('username').value;
@@ -262,74 +262,73 @@
                 const password = document.getElementById('password').value;
                 const password2 = document.getElementById('password2').value;
 
-                // 1. Validar campos obligatorios
-                if (!nombre) {
-                    mostrarMensaje("El nombre no puede estar en blanco", "error");
-                    return;
-                }
+                // Flags para saber qué campos se están editando
+                const editandoNombre = document.getElementById('nombre').classList.contains('editing');
+                const editandoEmail = document.getElementById('email').classList.contains('editing');
+                const editandoUsername = document.getElementById('username').classList.contains('editing');
+                const cambiandoPassword = password || password2;
+                const cambiandoAvatar = avatarInput.files.length > 0;
 
-                if (!email) {
-                    mostrarMensaje("El email no puede estar en blanco", "error");
-                    return;
-                }
-
-                if (!username) {
-                    mostrarMensaje("El nombre de usuario no puede estar en blanco", "error");
-                    return;
-                }
-
-                // 2. Validar formato del nombre
-                const nombreRegex = /^[A-Za-zñÑáéíóúÁÉÍÓÚ ]{1,50}$/;
-                if (!nombreRegex.test(nombre)) {
-                    mostrarMensaje("El nombre solo puede contener letras y espacios", "error");
-                    return;
-                }
-
-                // 3. Validar formato del email
-                const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
-                if (!emailRegex.test(email)) {
-                    mostrarMensaje("Introduce un email válido", "error");
-                    return;
-                }
-
-                // 4. Validar formato del username
-                const usernameRegex = /^[a-zA-Z0-9_.-]{3,20}$/;
-                if (!usernameRegex.test(username)) {
-                    mostrarMensaje("El username debe tener entre 3 y 20 caracteres y solo puede contener letras, números, puntos, guiones y guiones bajos", "error");
-                    return;
-                }
-
-                // 5. Validar contraseñas (solo si se están cambiando)
-                if (password || password2) {
-                    if (password !== password2) {
-                        mostrarMensaje("Las contraseñas nuevas no coinciden", "error");
+                // Validar campos solo si se están editando
+                if (editandoNombre) {
+                    if (!nombre) {
+                        mostrarMensaje("El nombre no puede estar en blanco", "error");
                         return;
                     }
-
-                    if (password.length < 12) {
-                        mostrarMensaje("La contraseña debe tener mínimo 12 caracteres", "error");
+                    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ ]{1,50}$/.test(nombre)) {
+                        mostrarMensaje("El nombre solo puede contener letras y espacios", "error");
                         return;
                     }
+                }
 
-                    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-                    if (!passwordRegex.test(password)) {
-                        mostrarMensaje("La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)", "error");
+                if (editandoEmail) {
+                    if (!email) {
+                        mostrarMensaje("El email no puede estar en blanco", "error");
                         return;
                     }
+                    if (!/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(email)) {
+                        mostrarMensaje("Introduce un email válido", "error");
+                        return;
+                    }
+                }
 
+                if (editandoUsername) {
+                    if (!username) {
+                        mostrarMensaje("El nombre de usuario no puede estar en blanco", "error");
+                        return;
+                    }
+                    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) {
+                        mostrarMensaje("El username debe tener entre 3 y 20 caracteres y solo puede contener letras, números, puntos, guiones y guiones bajos", "error");
+                        return;
+                    }
+                }
+
+                if (cambiandoPassword) {
                     if (!antiguaPassword) {
                         mostrarMensaje("Debes ingresar tu contraseña actual para realizar cambios", "error");
                         return;
                     }
+                    if (password !== password2) {
+                        mostrarMensaje("Las contraseñas nuevas no coinciden", "error");
+                        return;
+                    }
+                    if (password.length < 12) {
+                        mostrarMensaje("La contraseña debe tener mínimo 12 caracteres", "error");
+                        return;
+                    }
+                    if (!/(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}/.test(password)) {
+                        mostrarMensaje("La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)", "error");
+                        return;
+                    }
+                    if (antiguaPassword === password) {
+                        mostrarMensaje("La contraseña nueva no puede ser igual a la actual", "error");
+                        return;
+                    }
                 }
 
-                if (!password || !password2 || !antiguaPassword) {
-                    mostrarMensaje("Las contraseñas no pueden estar en blanco", "error");
-                    return;
-                }
-
-                if (antiguaPassword == password) {
-                    mostrarMensaje("La contraseña nueva no puede ser igual a la que ya tenias", "error");
+                // Verificar que al menos un campo esté siendo modificado
+                if (!editandoNombre && !editandoEmail && !editandoUsername && !cambiandoPassword && !cambiandoAvatar) {
+                    mostrarMensaje("No se han realizado cambios", "error");
                     return;
                 }
 
@@ -339,23 +338,19 @@
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
                 try {
-                    // Construir FormData
                     const fd = new FormData();
-                    fd.append('nombre', nombre);
-                    fd.append('email', email);
-                    fd.append('username', username);
-                    fd.append('antiguaPassword', antiguaPassword || '');
-                    fd.append('password', password || '');
-                    fd.append('password2', password2 || '');
-                    fd.append('tipo', 'local');
 
-                    // Si el usuario seleccionó un nuevo archivo
-                    if (avatarInput.files.length > 0) {
-                        fd.append('avatar', avatarInput.files[0]);
-                    } else {
-                        // Si no, envía el nombre de archivo existente
-                        fd.append('avatar', avatarFileName);
+                    // Solo agregar campos que están siendo editados
+                    if (editandoNombre) fd.append('nombre', nombre);
+                    if (editandoEmail) fd.append('email', email);
+                    if (editandoUsername) fd.append('username', username);
+                    if (cambiandoPassword) {
+                        fd.append('antiguaPassword', antiguaPassword);
+                        fd.append('password', password);
                     }
+                    if (cambiandoAvatar) fd.append('avatar', avatarInput.files[0]);
+
+                    fd.append('tipo', 'local');
 
                     const response = await fetch(`http://localhost:8080/api/v1/usuario/edit/${currentUserId}`, {
                         method: 'PUT',
@@ -374,9 +369,8 @@
 
                     // Actualizar el token si viene en la respuesta
                     if (data.token) {
-                        // Guardar el nuevo token en cookies
-                        document.cookie = `token=${data.token}; path=/; max-age=${24 * 60 * 60}`; // 1 día
-                        token = data.token; // Actualizar variable local
+                        document.cookie = `token=${data.token}; path=/; max-age=${24 * 60 * 60}`;
+                        token = data.token;
                     }
 
                     // Actualizar avatar si hubo cambio
@@ -385,14 +379,13 @@
                         imagenAvatar.style.backgroundImage = `url('${data.avatarUrl}?t=${new Date().getTime()}')`;
                     }
 
-                    mostrarMensaje(data.success || "Perfil actualizado correctamente", "exito");
-
-                    // Forzar recarga de datos del usuario
+                    mostrarMensaje(data.success || "Cambios guardados correctamente", "exito");
+                    resetFormToLockedState();
                     await initializeUser();
 
-                } catch (err) {
-                    console.error(err);
-                    mostrarMensaje("Error de conexión con el servidor", "error");
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarMensaje(error.message, "error");
                 } finally {
                     saveBtn.disabled = false;
                     saveBtn.innerHTML = 'Guardar cambios';
