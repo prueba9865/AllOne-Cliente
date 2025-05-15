@@ -102,7 +102,7 @@
     </div>
 
     <script>
-        const token = getCookie("token");
+        let token = getCookie("token");
         const avatarInput = document.getElementById('avatar');
         let currentUserId = null;
         let currentUserData = {}; // Almacenaremos los datos originales del usuario
@@ -357,9 +357,7 @@
                         fd.append('avatar', avatarFileName);
                     }
 
-                    // Petición PUT
-                    const response = await fetch(
-                        `http://localhost:8080/api/v1/usuario/edit/${currentUserId}`, {
+                    const response = await fetch(`http://localhost:8080/api/v1/usuario/edit/${currentUserId}`, {
                         method: 'PUT',
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -367,29 +365,30 @@
                         body: fd
                     });
 
-                    // Manejar respuesta
                     if (!response.ok) {
                         const errorData = await response.json();
-
-                        // Manejar errores de validación del backend
-                        if (errorData.errors) {
-                            // Mostrar el primer error encontrado
-                            const firstError = Object.values(errorData.errors)[0];
-                            mostrarMensaje(firstError, "error");
-                        } else if (errorData.message) {
-                            mostrarMensaje(errorData.message, "error");
-                        } else {
-                            mostrarMensaje("Error al actualizar el perfil", "error");
-                        }
-                        return;
+                        throw new Error(errorData.message || 'Error al actualizar');
                     }
 
                     const data = await response.json();
-                    mostrarMensaje("Perfil actualizado correctamente", "exito");
-                    resetFormToLockedState();
 
-                    // Actualizar datos del usuario después de guardar
-                    //await loadUserData();
+                    // Actualizar el token si viene en la respuesta
+                    if (data.token) {
+                        // Guardar el nuevo token en cookies
+                        document.cookie = `token=${data.token}; path=/; max-age=${24 * 60 * 60}`; // 1 día
+                        token = data.token; // Actualizar variable local
+                    }
+
+                    // Actualizar avatar si hubo cambio
+                    if (data.avatarUrl) {
+                        const imagenAvatar = document.getElementById('imagenAvatar');
+                        imagenAvatar.style.backgroundImage = `url('${data.avatarUrl}?t=${new Date().getTime()}')`;
+                    }
+
+                    mostrarMensaje(data.success || "Perfil actualizado correctamente", "exito");
+
+                    // Forzar recarga de datos del usuario
+                    await initializeUser();
 
                 } catch (err) {
                     console.error(err);
@@ -441,7 +440,8 @@
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include' // Añade esto para manejar cookies correctamente
                 });
 
                 if (!response.ok) {
@@ -449,17 +449,34 @@
                 }
 
                 const data = await response.json();
+
+                // Verifica si la respuesta es un objeto de usuario válido
+                if (!data || !data.id) {
+                    // Si no es un usuario válido, podría ser una redirección OAuth
+                    if (data && data.redirect) {
+                        // Manejar redirección OAuth de manera diferente
+                        console.warn("Redirección OAuth detectada para usuario local");
+                        return;
+                    }
+                    throw new Error("Datos de usuario no válidos");
+                }
+
                 currentUserData = data;
                 currentUserId = data.id;
 
-                const url = data.avatar
-                const match = url.match(/(?<=uploads\/avatars\/)[^\/]+$/);
-                console.log(match[0]);
-                avatarFileName = match[0]
-                console.log("Usuario ID obtenido:", currentUserId);
+                // Manejo del avatar más robusto
+                if (data.avatar) {
+                    try {
+                        const url = data.avatar;
+                        const match = url.match(/(?<=uploads\/avatars\/)[^\/]+$/);
+                        avatarFileName = match ? match[0] : null;
+                    } catch (e) {
+                        console.warn("Error procesando avatar URL:", e);
+                        avatarFileName = null;
+                    }
+                }
 
-                // Cargar datos del usuario
-                // Actualizar UI con los datos
+                // Actualizar UI
                 document.getElementById('nombre').value = data.nombre || '';
                 document.getElementById('email').value = data.email || '';
                 document.getElementById('username').value = data.username || '';
@@ -473,14 +490,19 @@
                     imagenAvatar.style.borderRadius = '50%';
                     document.querySelector(".custom-file-upload label").classList.add("has-image");
                 } else {
-                    imagenAvatar.style.backgroundImage = 'url(https://www.gravatar.com/avatar/default?s=200)';
+                    // Usar un avatar por defecto local en lugar de Gravatar para evitar problemas
+                    imagenAvatar.style.backgroundImage = 'url(images/default-avatar.png)';
                     imagenAvatar.style.backgroundColor = getRandomColor();
                 }
 
             } catch (error) {
                 console.error("Error en la petición:", error);
                 if (error.message.includes("401")) {
+                    // Redirigir al login solo si es un error de autenticación
                     window.location.href = "/index.html";
+                } else if (error.message.includes("Failed to fetch")) {
+                    // Manejar específicamente errores de conexión
+                    mostrarMensaje("Error de conexión con el servidor", "error");
                 }
             }
         };
