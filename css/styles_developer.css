@@ -1,0 +1,167 @@
+/* Reset y estilos base */
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Jost', sans-serif;
+}
+
+body {
+  background: linear-gradient(to bottom, #e0e7ff, #a5b4fc, #818cf8);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 0;
+}
+
+/* Contenedor principal */
+.developer-container {
+  width: 90%;           /* Ocupa el 90% del ancho disponible */
+  max-width: 800px;     /* Pero nunca pase de 800px */
+  margin: 0 auto;       /* Centrar horizontalmente */
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 5px 20px 50px rgba(0,0,0,0.2);
+  overflow: hidden;
+  padding: 30px;
+}
+
+
+/* Header con avatar y nombre */
+.bio-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.bio-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;      /* Ajusta toda la imagen dentro del círculo */
+  object-position: center top;  /* Centra la imagen; puedes probar "top", "bottom", "left", etc. */
+  background-color: #fff;   /* Opcional: color de fondo para zonas vacías */
+  border: 3px solid #818cf8;
+}
+
+.bio-name {
+  font-size: 1.6em;
+  margin-top: 10px;
+  font-weight: 700;
+  color: #333;
+}
+.bio-title {
+  font-size: 0.95em;
+  color: #5865F2;
+  margin-top: 4px;
+}
+
+/* Secciones generales */
+.bio-section {
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #4f5bd5;
+  margin-bottom: 8px;
+  position: relative;
+}
+.section-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: #5865F2;
+  margin-top: 4px;
+  border-radius: 2px;
+}
+.section-text {
+  font-size: 0.9em;
+  line-height: 1.5;
+  color: #555;
+}
+
+/* Experiencia */
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.experience-item .item-title {
+  font-size: 1em;
+  font-weight: 600;
+  color: #333;
+}
+.item-date {
+  display: block;
+  font-size: 0.8em;
+  color: #999;
+  margin-bottom: 6px;
+}
+.item-list {
+  margin-left: 15px;
+  list-style: disc;
+  color: #555;
+  font-size: 0.88em;
+}
+
+/* Educación */
+.education-list {
+  list-style: none;
+  padding-left: 0;
+}
+.education-list li {
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+/* Habilidades */
+.skills-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.skills-list li {
+  background: #e0e7ff;
+  padding: 8px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 0.85em;
+  color: #333;
+  transition: background 0.2s ease-in;
+}
+
+.skills-list p {
+  background: #e0e7ff;
+  padding: 8px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 0.85em;
+  color: #333;
+  transition: background 0.2s ease-in;
+}
+.skills-list li:hover {
+  background: #c7d2fe;
+}
+
+.skills-list p:hover {
+  background: #c7d2fe;
+}
+
+/* Footer de contacto */
+.bio-footer {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+  font-size: 0.9em;
+  color: #555;
+}
+.bio-footer a {
+  color: #5865F2;
+  text-decoration: none;
+}
+.bio-footer a:hover {
+  text-decoration: underline;
+}
