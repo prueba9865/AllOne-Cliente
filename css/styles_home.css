@@ -1003,6 +1003,7 @@ button:hover {
 /* Estilos para los mensajes del chat */
 .message {
   padding: 10px 15px;
+  padding-right: 30px; /* espacio para el icono */
   margin: 8px 0;
   border-radius: 18px;
   max-width: 70%;
@@ -1035,6 +1036,33 @@ button:hover {
   margin-top: 4px;
   text-align: right;
 }
+
+/* Oculta siempre el icono salvo en hover */
+.delete-icon {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  visibility: hidden;    /* invisible, pero mantiene el flujo para hover */
+  opacity: 0;            /* totalmente transparente */
+  color: #888;
+  cursor: pointer;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;  /* no captura clicks mientras está oculto */
+}
+
+/* Cuando el ratón entra en .message, lo hacemos visible */
+.message.mine:hover .delete-icon {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;  /* activamos clicks sólo en hover */
+}
+
+/* Color rojo al pasar por encima del icono */
+.delete-icon:hover {
+  color: #c62828;
+}
+
 
 /* Animación para nuevos mensajes */
 @keyframes fadeIn {

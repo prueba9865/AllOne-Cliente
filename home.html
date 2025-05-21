@@ -781,6 +781,7 @@
                 mensajes.forEach(m => {
                     const div = document.createElement('div');
                     div.className = 'message ' + (m.usuarioId === currentUserId ? 'mine' : 'theirs');
+                    div.dataset.id = m.id;
 
                     // Crear elemento para el contenido del mensaje
                     const content = document.createElement('p');
@@ -792,6 +793,34 @@
                     time.className = 'message-time';
                     time.textContent = new Date(m.createdAt).toLocaleTimeString();
                     div.appendChild(time);
+
+                    // Solo añadimos el icono si es tu propio mensaje
+                    if (div.classList.contains('mine')) {
+                        const trashIcon = document.createElement('i');
+                        trashIcon.className = 'fas fa-trash delete-icon';
+                        trashIcon.title = 'Eliminar mensaje';
+                        trashIcon.addEventListener('click', async e => {
+                            e.stopPropagation();
+
+                            if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
+                                const messageId = div.dataset.id;
+                                //console.log("id del mensaje: " + messageId)
+                                try {
+                                    const delRes = await fetch(
+                                        `http://localhost:8080/api/messages/${messageId}`,
+                                        { method: 'DELETE' }
+                                    );
+                                    if (!delRes.ok) throw new Error(delRes.status);
+                                    // Borrado OK: quita del DOM
+                                    div.remove();
+                                } catch (err) {
+                                    console.error('Error eliminando mensaje:', err);
+                                    alert('No se pudo eliminar el mensaje.');
+                                }
+                            }
+                        });
+                        div.appendChild(trashIcon);
+                    }
 
                     messagesContainer.appendChild(div);
                 });
@@ -845,6 +874,34 @@
                 time.className = 'message-time';
                 time.textContent = new Date(nuevo.createdAt).toLocaleTimeString();
                 div.appendChild(time);                  // <— ¡Ojo aquí, lo insertas en el div!
+
+                // Solo añadimos el icono si es tu propio mensaje
+                if (div.classList.contains('mine')) {
+                    const trashIcon = document.createElement('i');
+                    trashIcon.className = 'fas fa-trash delete-icon';
+                    trashIcon.title = 'Eliminar mensaje';
+                    trashIcon.addEventListener('click', async e => {
+                        e.stopPropagation();
+                        if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
+
+                            const messageId = nuevo.id;
+                            //console.log("id del mensaje: " + nuevo.id)
+                            try {
+                                const delRes = await fetch(
+                                    `http://localhost:8080/api/messages/${messageId}`,
+                                    { method: 'DELETE' }
+                                );
+                                if (!delRes.ok) throw new Error(delRes.status);
+                                // Borrado OK: quita del DOM
+                                div.remove();
+                            } catch (err) {
+                                console.error('Error eliminando mensaje:', err);
+                                alert('No se pudo eliminar el mensaje.');
+                            }
+                        }
+                    });
+                    div.appendChild(trashIcon);
+                }
 
                 // Ahora sí, lo añades al contenedor
                 messagesContainer.appendChild(div);
