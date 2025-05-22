@@ -1014,6 +1014,7 @@ button:hover {
 
 /* Mensajes del usuario actual (derecha) */
 .message.mine {
+  padding-right: 15px;
   background: #4f46e5;
   color: white;
   margin-left: auto; /* Alinea a la derecha */
@@ -1041,14 +1042,18 @@ button:hover {
 .delete-icon {
   position: absolute;
   top: 50%;
-  right: 5px;
+  left: -25px; /* Lo movemos fuera del contenedor */
   transform: translateY(-50%);
-  visibility: hidden;    /* invisible, pero mantiene el flujo para hover */
-  opacity: 0;            /* totalmente transparente */
+  visibility: hidden;
+  opacity: 0;
   color: #888;
   cursor: pointer;
   transition: opacity 0.2s ease, visibility 0.2s ease;
-  pointer-events: none;  /* no captura clicks mientras está oculto */
+  pointer-events: none;
+  background: white;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* Cuando el ratón entra en .message, lo hacemos visible */
@@ -1061,6 +1066,7 @@ button:hover {
 /* Color rojo al pasar por encima del icono */
 .delete-icon:hover {
   color: #c62828;
+  background: #fee2e2;
 }
 
 
