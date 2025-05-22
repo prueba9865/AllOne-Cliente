@@ -175,6 +175,20 @@
             </div>
         </div>
     </div>
+    <!-- Popup de edición (oculto por defecto) -->
+    <div id="editMessageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar mensaje</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <textarea id="editMessageText" class="modal-textarea"></textarea>
+            <div class="modal-actions">
+                <button id="cancelEdit" class="modal-btn cancel">Cancelar</button>
+                <button id="saveEdit" class="modal-btn save">Guardar</button>
+            </div>
+        </div>
+    </div>
     <script>
         let currentContactId = null;
         let currentUserId = null;
@@ -794,24 +808,40 @@
                     time.textContent = new Date(m.createdAt).toLocaleTimeString();
                     div.appendChild(time);
 
-                    // Solo añadimos el icono si es tu propio mensaje
-                    if (div.classList.contains('mine')) {
-                        const trashIcon = document.createElement('i');
-                        trashIcon.className = 'fas fa-trash delete-icon';
-                        trashIcon.title = 'Eliminar mensaje';
-                        trashIcon.addEventListener('click', async e => {
-                            e.stopPropagation();
+                    // Solo si es tu mensaje añadimos los botones de acción
+                    if (m.usuarioId === currentUserId) {
+                        const actions = document.createElement('div');
+                        actions.className = 'message-actions';
 
+                        // Botón Editar
+                        const editBtn = document.createElement('div');
+                        editBtn.className = 'edit-btn';
+                        editBtn.title = 'Editar mensaje';
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fas fa-pencil-alt';
+                        editBtn.appendChild(editIcon);
+                        editBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openEditModal(m, content); // Pasamos el mensaje y el elemento del contenido
+                        });
+                        actions.appendChild(editBtn);
+
+                        // Botón Eliminar
+                        const deleteBtn = document.createElement('div');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.title = 'Eliminar mensaje';
+                        const trashIcon = document.createElement('i');
+                        trashIcon.className = 'fas fa-trash';
+                        deleteBtn.appendChild(trashIcon);
+                        deleteBtn.addEventListener('click', async e => {
+                            e.stopPropagation();
                             if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
-                                const messageId = div.dataset.id;
-                                //console.log("id del mensaje: " + messageId)
                                 try {
                                     const delRes = await fetch(
-                                        `http://localhost:8080/api/messages/${messageId}`,
+                                        `http://localhost:8080/api/messages/${m.id}`,
                                         { method: 'DELETE' }
                                     );
                                     if (!delRes.ok) throw new Error(delRes.status);
-                                    // Borrado OK: quita del DOM
                                     div.remove();
                                 } catch (err) {
                                     console.error('Error eliminando mensaje:', err);
@@ -819,7 +849,9 @@
                                 }
                             }
                         });
-                        div.appendChild(trashIcon);
+                        actions.appendChild(deleteBtn);
+
+                        div.appendChild(actions);
                     }
 
                     messagesContainer.appendChild(div);
@@ -835,6 +867,57 @@
                 errorDiv.textContent = 'No se pudieron cargar los mensajes';
                 messagesContainer.appendChild(errorDiv);
             }
+        }
+
+        function openEditModal(message, contentElement) {
+            const modal = document.getElementById('editMessageModal');
+            const textarea = document.getElementById('editMessageText');
+            const closeBtn = document.querySelector('.close-modal');
+            const cancelBtn = document.getElementById('cancelEdit');
+            const saveBtn = document.getElementById('saveEdit');
+
+            // Rellena el textarea con el mensaje actual
+            textarea.value = message.contenido;
+            modal.style.display = 'flex';
+
+            // Cierra el modal
+            const closeModal = () => {
+                modal.style.display = 'none';
+            };
+
+            // Event listeners
+            closeBtn.onclick = closeModal;
+            cancelBtn.onclick = closeModal;
+
+            saveBtn.onclick = async () => {
+                const nuevoTexto = textarea.value.trim();
+                if (nuevoTexto !== '' && nuevoTexto !== message.contenido) {
+                    try {
+                        const patchRes = await fetch(`http://localhost:8080/api/messages/${message.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contenido: nuevoTexto })
+                        });
+                        if (!patchRes.ok) throw new Error(patchRes.status);
+
+                        // Actualiza tanto el DOM como el objeto original
+                        contentElement.textContent = nuevoTexto;
+                        message.contenido = nuevoTexto;
+
+                        closeModal();
+                    } catch (err) {
+                        console.error('Error editando mensaje:', err);
+                        alert('No se pudo editar el mensaje.');
+                    }
+                } else {
+                    closeModal();
+                }
+            };
+
+            // Cerrar al hacer clic fuera del modal
+            modal.onclick = (e) => {
+                if (e.target === modal) closeModal();
+            };
         }
 
         async function sendMessage() {
@@ -875,33 +958,55 @@
                 time.textContent = new Date(nuevo.createdAt).toLocaleTimeString();
                 div.appendChild(time);                  // <— ¡Ojo aquí, lo insertas en el div!
 
-                // Solo añadimos el icono si es tu propio mensaje
-                if (div.classList.contains('mine')) {
-                    const trashIcon = document.createElement('i');
-                    trashIcon.className = 'fas fa-trash delete-icon';
-                    trashIcon.title = 'Eliminar mensaje';
-                    trashIcon.addEventListener('click', async e => {
-                        e.stopPropagation();
-                        if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
+                // Actions container
+                const actions = document.createElement('div');
+                actions.className = 'message-actions';
 
-                            const messageId = nuevo.id;
-                            //console.log("id del mensaje: " + nuevo.id)
-                            try {
-                                const delRes = await fetch(
-                                    `http://localhost:8080/api/messages/${messageId}`,
-                                    { method: 'DELETE' }
-                                );
-                                if (!delRes.ok) throw new Error(delRes.status);
-                                // Borrado OK: quita del DOM
-                                div.remove();
-                            } catch (err) {
-                                console.error('Error eliminando mensaje:', err);
-                                alert('No se pudo eliminar el mensaje.');
-                            }
+                // Edit button
+                const editBtn = document.createElement('div');
+                editBtn.className = 'edit-btn';
+                editBtn.title = 'Editar mensaje';
+                const editIcon = document.createElement('i');
+                editIcon.className = 'fas fa-pencil-alt';
+                editBtn.appendChild(editIcon);
+
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    //console.log("mensaje de mierda: " + nuevo.contenido)
+                    openEditModal(nuevo, content); // Pasamos el mensaje y el elemento del contenido
+                });
+
+                actions.appendChild(editBtn);
+
+                // Delete button
+                const deleteBtn = document.createElement('div');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.title = 'Eliminar mensaje';
+                const trashIcon = document.createElement('i');
+                trashIcon.className = 'fas fa-trash';
+                deleteBtn.appendChild(trashIcon);
+
+                deleteBtn.addEventListener('click', async e => {
+                    e.stopPropagation();
+                    if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
+                        try {
+                            const delRes = await fetch(
+                                `http://localhost:8080/api/messages/${nuevo.id}`,
+                                { method: 'DELETE' }
+                            );
+                            if (!delRes.ok) throw new Error(delRes.status);
+                            div.remove();
+                        } catch (err) {
+                            console.error('Error eliminando mensaje:', err);
+                            alert('No se pudo eliminar el mensaje.');
                         }
-                    });
-                    div.appendChild(trashIcon);
-                }
+                    }
+                });
+
+                actions.appendChild(deleteBtn);
+
+                // Añadimos actions al mensaje
+                div.appendChild(actions);
 
                 // Ahora sí, lo añades al contenedor
                 messagesContainer.appendChild(div);
