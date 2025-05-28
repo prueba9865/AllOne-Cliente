@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniChat HF</title>
+</head>
+<body>
+  <h2>MiniChat con Hugging Face</h2>
+  <input type="text" id="userInput" placeholder="Escribe algo..." />
+  <button onclick="sendMessage()">Enviar</button>
+  <p id="response"></p>
+
+  <script>
+    async function sendMessage() {
+      const message = document.getElementById('userInput').value;
+      const response = await fetch('http://localhost:8080/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenido: message })
+      });
+      const text = await response.text();
+      document.getElementById('response').innerText = text;
+    }
+  </script>
+</body>
+</html>
