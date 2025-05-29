@@ -161,16 +161,48 @@
 
         <!-- Sección de IA -->
         <div class="section ai-section" style="display: none;">
-            <h2>Asistente IA</h2>
-            <div class="ai-container">
-                <div class="ai-messages" id="aiMessages">
-                    <div class="ai-message received">
-                        ¡Hola! Soy tu asistente IA. ¿En qué puedo ayudarte?
+            <!-- Vista de lista de chats IA (opcional, si quieres mostrar historial de conversaciones) -->
+            <div class="chat-list-view" id="aiChatListView">
+                <h2>Conversaciones IA</h2>
+                <div class="chat-list-full" id="aiChatList">
+                    <!-- Los chats IA se cargarán dinámicamente -->
+                    <div class="chat-item" data-chat-id="default">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI Assistant">
+                        <div class="chat-info">
+                            <span class="chat-name">Asistente IA</span>
+                            <span class="last-message">¡Hola! ¿En qué puedo ayudarte?</span>
+                        </div>
                     </div>
                 </div>
-                <div class="ai-input-area">
-                    <textarea id="aiPrompt" placeholder="Escribe tu pregunta aquí..."></textarea>
-                    <button onclick="sendAIPrompt()">Preguntar</button>
+            </div>
+
+            <!-- Vista de chat IA -->
+            <div class="chat-detail-view active" id="aiChatView">
+                <div class="chat-header">
+                    <button class="back-button" onclick="showAIChatList()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI Assistant"
+                        class="profile-pic">
+                    <span class="chat-name">Asistente IA</span>
+                </div>
+                <div class="messages" id="aiMessages">
+                    <div class="message received">
+                        <div class="message-content">
+                            <p>¡Hola! Soy tu asistente IA. ¿En qué puedo ayudarte hoy?</p>
+                        </div>
+                        <div class="message-time">Ahora</div>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <div class="message-actions">
+                        <button class="action-btn" title="Adjuntar archivo"><i class="fas fa-paperclip"></i></button>
+                    </div>
+                    <input type="text" id="aiMessageInput" placeholder="Escribe tu mensaje..."
+                        onkeypress="handleAIKeyPress(event)">
+                    <button class="send-btn" onclick="sendAIMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -190,6 +222,46 @@
         </div>
     </div>
     <script>
+        // Manejo de pestañas
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remover clase active de todos los botones y secciones
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                    section.style.display = 'none';
+                });
+
+                // Añadir clase active al botón clickeado
+                button.classList.add('active');
+
+                // Mostrar la sección correspondiente
+                const tab = button.dataset.tab;
+                const section = document.querySelector(`.${tab}-section`);
+                if (section) {
+                    section.classList.add('active');
+                    section.style.display = 'block';
+                }
+
+                // Manejo específico para la sección de IA
+                if (tab === 'ai') {
+                    showAIChatView(); // Mostrar la vista de chat por defecto
+                }
+            });
+        });
+
+        // Asegurarse de que la sección de chat esté activa al inicio
+        document.addEventListener('DOMContentLoaded', function () {
+            // Activar la pestaña de chat por defecto
+            document.querySelector('.tab-button[data-tab="chat"]').classList.add('active');
+            document.querySelector('.chat-section').classList.add('active');
+            document.querySelector('.chat-section').style.display = 'block';
+
+            // Inicializar la vista de IA
+            showAIChatView();
+        });
         let currentContactId = null;
         let currentUserId = null;
         const messagesContainer = document.getElementById('messages');
@@ -1080,6 +1152,81 @@
             chatHeader.querySelector('.chat-name').textContent = contacto.username || 'Usuario sin nombre';
 
             loadChatMessages();
+        }
+
+        // Funciones para manejar el chat IA
+        function showAIChatList() {
+            document.querySelector('#aiChatListView').classList.add('active');
+            document.querySelector('#aiChatView').classList.remove('active');
+        }
+
+        function showAIChatView() {
+            document.querySelector('#aiChatListView').classList.remove('active');
+            document.querySelector('#aiChatView').classList.add('active');
+        }
+
+        function handleAIKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendAIMessage();
+            }
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('aiMessageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // 1. Mostrar el mensaje del usuario
+            addAIMessage(message, 'sent');
+            input.value = '';
+
+            try {
+                // 2. Llamada a tu API
+                const response = await fetch('http://localhost:8080/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contenido: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en la respuesta: ${response.status}`);
+                }
+
+                // 3. Obtener el texto completo de la respuesta
+                let text = await response.text();
+
+                // 4. Eliminar todas las apariciones de "**Respuesta:**"
+                text = text.replace(/\*\*Respuesta:\*\*/g, '').trim();
+
+                // 5. Mostrar la respuesta de la IA en el chat
+                addAIMessage(text, 'received');
+
+            } catch (err) {
+                console.error('Error enviando el mensaje:', err);
+                addAIMessage('¡Ups! Hubo un error al comunicarme con el servidor.', 'received');
+            }
+        }
+
+
+
+        function addAIMessage(text, type) {
+            const messagesContainer = document.getElementById('aiMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageDiv.innerHTML = `
+        <div class="message-content">
+            <p>${text}</p>
+        </div>
+        <div class="message-time">${timeString}</div>
+    `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
     </script>

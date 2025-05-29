@@ -1307,6 +1307,141 @@ button:hover {
   transform: translateY(-2px);
 }
 
+/* Estilos para la sección IA */
+.ai-section .chat-detail-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.ai-section .messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+}
+
+.ai-section .message {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+}
+
+.ai-section .message.received {
+    align-self: flex-start;
+}
+
+.ai-section .message.sent {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.ai-section .message-content {
+    padding: 10px 15px;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.ai-section .message.received .message-content {
+    background-color: #e5e5ea;
+    color: #000;
+}
+
+.ai-section .message.sent .message-content {
+    background-color: #007aff;
+    color: #fff;
+}
+
+.ai-section .message-time {
+    font-size: 0.75rem;
+    color: #8e8e93;
+    margin-top: 4px;
+}
+
+.ai-section .input-area {
+    display: flex;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #e5e5ea;
+    align-items: center;
+}
+
+.ai-section .message-actions {
+    display: flex;
+    margin-right: 10px;
+}
+
+.ai-section .action-btn {
+    background: none;
+    border: none;
+    color: #007aff;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.ai-section #aiMessageInput {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #e5e5ea;
+    border-radius: 20px;
+    outline: none;
+}
+
+.ai-section .send-btn {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    margin-left: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* IA Chat: Mensajes enviados en morado como botón de chat normal */
+.ai-section .message.sent .message-content {
+  background-color: #4f46e5;      /* Morado principal */
+  color: #ffffff;                 /* Texto en blanco */
+  border-radius: 15px 15px 0 15px;/* Misma forma de burbuja */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* IA Chat: Mensajes enviados hover */
+.ai-section .message.sent .message-content:hover {
+  background-color: #4338ca;      /* Oscurece en hover */
+  transform: translateY(-2px);
+}
+
+/* IA Chat: Botón de envío igual al chat normal */
+.ai-section .send-btn {
+  background: #4f46e5;            /* Morado principal */
+  color: #ffffff;                 /* Ícono/texto blanco */
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* IA Chat: Botón de envío hover */
+.ai-section .send-btn:hover {
+  background: #4338ca;            /* Oscurece en hover */
+  transform: translateY(-2px) scale(1.05);
+}
+
+
 /* Animación */
 @keyframes fadeIn {
   from { opacity: 0; }
