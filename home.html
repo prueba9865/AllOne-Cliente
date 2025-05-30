@@ -36,16 +36,6 @@
         </div>
     </div>
 
-    <!-- Botón para crear chat -->
-    <div class="create-chat-btn" id="createChatBtn" style="left: 20px;">
-        <i class="fas fa-comments"></i>
-    </div>
-
-    <!-- Botón para crear grupo -->
-    <div class="create-group-btn" id="createGroupBtn" style="left: 70px;">
-        <i class="fas fa-users"></i>
-    </div>
-
     <!-- Botón para agregar gente -->
     <div class="add-people-btn" id="addPeopleBtn" style="left: 120px;">
         <i class="fas fa-user-plus"></i>
@@ -198,10 +188,10 @@
                     <div class="message-actions">
                         <button class="action-btn" title="Adjuntar archivo"><i class="fas fa-paperclip"></i></button>
                     </div>
-                    <input type="text" id="aiMessageInput" placeholder="Escribe tu mensaje..."
+                    <input type="text" id="aiMessageInput" placeholder="Escribe un mensaje..."
                         onkeypress="handleAIKeyPress(event)">
-                    <button class="send-btn" onclick="sendAIMessage()">
-                        <i class="fas fa-paper-plane"></i>
+                    <button class="send-btn" onclick="sendAIMessage()">Enviar
+                        <!--<i class="fas fa-paper-plane"></i>-->
                     </button>
                 </div>
             </div>
@@ -313,9 +303,9 @@
                 searchPopup.classList.add('active');
             });
 
-            addChat.addEventListener('click', () => {
+            /*addChat.addEventListener('click', () => {
                 alert("añadir un chat de usuario");
-            });
+            });*/
 
             // Ocultar popup
             closePopup.addEventListener('click', () => {
