@@ -93,9 +93,12 @@ body {
   backdrop-filter: blur(10px);
 }
 
+/* Sección activa sin padding */
 .section.active {
   display: flex;
   flex-direction: column;
+  padding: 0;
+  height: calc(100vh - 100px);
 }
 
 h2 {
@@ -104,6 +107,7 @@ h2 {
   font-size: 2em;
   text-align: center;
 }
+
 
 /* Chat Section */
 .chat-section {
@@ -334,38 +338,62 @@ button:hover {
   height: 100%;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
-  padding: 20px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .ai-messages {
   flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  background: #e0e7ff;
-  border-radius: 15px;
-  margin-bottom: 20px;
-}
-
-.ai-message {
-  margin: 10px 0;
   padding: 15px;
-  border-radius: 15px;
-  max-width: 85%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  background: #f8fafc;
+  width: 100%;
 }
 
+/* Mensajes generales (igual que .message) */
+.ai-message {
+  padding: 10px 15px;
+  margin: 8px 0;
+  border-radius: 18px;
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* TUS MENSAJES (igual que .message.mine) */
 .ai-message.sent {
   background: #4f46e5;
   color: white;
   margin-left: auto;
-  border-radius: 15px 15px 0 15px;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding-right: 15px;
+  transition: all 0.3s ease;
 }
 
+/* RESPUESTAS IA (igual que .message.theirs) */
 .ai-message.received {
-  background: white;
+  background: #e0e7ff;
+  color: #1e293b;
   margin-right: auto;
-  border-radius: 15px 15px 15px 0;
-  border: 1px solid rgba(79, 70, 229, 0.2);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Hora del mensaje (igual que .message-time) */
+.ai-message-time {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Efecto hover (igual que en chat normal) */
+.ai-message.sent:hover {
+  transform: translateY(-2px);
+  background: #4338ca;
 }
 
 /* Estilos para el avatar y menú desplegable */

@@ -142,7 +142,7 @@
                 </div>
                 <div class="messages" id="messages"></div>
                 <div class="input-area">
-                    <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+                    <input type="text" id="messageInput" placeholder="Escribe un mensaje..." onkeypress="handleChatKeyPress(event)">
                     <button onclick="sendMessage()">Enviar</button>
                 </div>
             </div>
@@ -1152,6 +1152,12 @@
         function showAIChatView() {
             document.querySelector('#aiChatListView').classList.remove('active');
             document.querySelector('#aiChatView').classList.add('active');
+        }
+
+        function handleChatKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
         }
 
         function handleAIKeyPress(e) {
