@@ -108,35 +108,6 @@ button:hover {
   transform: scale(0.6);
 }
 
-/* Estilos para el botón de Google */
-.google-btn {
-  width: 60%;
-  height: 40px;
-  margin: 10px auto;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  color: #757575;
-  background: #fff;
-  border: 1px solid #ccc;
-  font-size: 1em;
-  font-weight: bold;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.2s ease-in;
-  padding-left: 10px;
-}
-
-.google-btn:hover {
-  background: #f8f9fa;
-}
-
-.google-btn img {
-  width: 20px;
-  height: 20px;
-}
-
 #mensaje {
   position: absolute;
   top: 20px;
