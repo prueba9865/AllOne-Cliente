@@ -1017,6 +1017,7 @@
                 // --- CREACIÓN DEL DIV COMO EN loadChatMessages ---
                 const div = document.createElement('div');
                 div.className = 'message mine';
+                div.dataset.id = nuevo.id;
 
                 // Contenido
                 const content = document.createElement('p');
@@ -1131,6 +1132,7 @@
         let chatRefreshInterval = null;
 
         async function startChatWithContact(contacto) {
+            console.log("el contacto de mierda es: " + contacto)
             currentContactId = contacto.id;
 
             // Detener el intervalo anterior si existe
