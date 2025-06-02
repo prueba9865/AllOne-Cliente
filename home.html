@@ -142,7 +142,8 @@
                 </div>
                 <div class="messages" id="messages"></div>
                 <div class="input-area">
-                    <input type="text" id="messageInput" placeholder="Escribe un mensaje..." onkeypress="handleChatKeyPress(event)">
+                    <input type="text" id="messageInput" placeholder="Escribe un mensaje..."
+                        onkeypress="handleChatKeyPress(event)">
                     <button onclick="sendMessage()">Enviar</button>
                 </div>
             </div>
@@ -541,7 +542,12 @@
             return null; // Si no encuentra la cookie
         }
 
+        // También deberías limpiar el intervalo cuando se cierra el chat
         function showChatList() {
+            if (chatRefreshInterval) {
+                clearInterval(chatRefreshInterval);
+                chatRefreshInterval = null;
+            }
             document.querySelector('.chat-list-view').classList.add('active');
             document.querySelector('.chat-detail-view').classList.remove('active');
         }
@@ -845,81 +851,84 @@
         }
 
         async function loadChatMessages() {
-            messagesContainer.innerHTML = ''; // Limpia mensajes anteriores
-
             try {
-                const res = await fetch(`http://localhost:8080/api/user/${currentUserId}/${currentContactId}/messages`);
+                const res = await fetch(`http://localhost:8080/api/user/${currentUserId}/${currentContactId}/messages?t=${Date.now()}`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const mensajes = await res.json();
-                console.log("Ejemplo de mensaje:", mensajes[0]); // ← Verifica la propiedad del usuario
 
-                mensajes.forEach(m => {
-                    const div = document.createElement('div');
-                    div.className = 'message ' + (m.usuarioId === currentUserId ? 'mine' : 'theirs');
-                    div.dataset.id = m.id;
+                // Solo actualizar si hay nuevos mensajes
+                const currentMessageIds = Array.from(messagesContainer.querySelectorAll('.message')).map(el => el.dataset.id);
+                const newMessages = mensajes.filter(m => !currentMessageIds.includes(m.id.toString()));
 
-                    // Crear elemento para el contenido del mensaje
-                    const content = document.createElement('p');
-                    content.textContent = m.contenido;
-                    div.appendChild(content);
+                if (newMessages.length > 0) {
+                    newMessages.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = 'message ' + (m.usuarioId === currentUserId ? 'mine' : 'theirs');
+                        div.dataset.id = m.id;
 
-                    // Opcional: agregar fecha/hora
-                    const time = document.createElement('span');
-                    time.className = 'message-time';
-                    time.textContent = new Date(m.createdAt).toLocaleTimeString();
-                    div.appendChild(time);
+                        // Crear elemento para el contenido del mensaje
+                        const content = document.createElement('p');
+                        content.textContent = m.contenido;
+                        div.appendChild(content);
 
-                    // Solo si es tu mensaje añadimos los botones de acción
-                    if (m.usuarioId === currentUserId) {
-                        const actions = document.createElement('div');
-                        actions.className = 'message-actions';
+                        // Opcional: agregar fecha/hora
+                        const time = document.createElement('span');
+                        time.className = 'message-time';
+                        time.textContent = new Date(m.createdAt).toLocaleTimeString();
+                        div.appendChild(time);
 
-                        // Botón Editar
-                        const editBtn = document.createElement('div');
-                        editBtn.className = 'edit-btn';
-                        editBtn.title = 'Editar mensaje';
-                        const editIcon = document.createElement('i');
-                        editIcon.className = 'fas fa-pencil-alt';
-                        editBtn.appendChild(editIcon);
-                        editBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            openEditModal(m, content); // Pasamos el mensaje y el elemento del contenido
-                        });
-                        actions.appendChild(editBtn);
+                        // Solo si es tu mensaje añadimos los botones de acción
+                        if (m.usuarioId === currentUserId) {
+                            const actions = document.createElement('div');
+                            actions.className = 'message-actions';
 
-                        // Botón Eliminar
-                        const deleteBtn = document.createElement('div');
-                        deleteBtn.className = 'delete-btn';
-                        deleteBtn.title = 'Eliminar mensaje';
-                        const trashIcon = document.createElement('i');
-                        trashIcon.className = 'fas fa-trash';
-                        deleteBtn.appendChild(trashIcon);
-                        deleteBtn.addEventListener('click', async e => {
-                            e.stopPropagation();
-                            if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
-                                try {
-                                    const delRes = await fetch(
-                                        `http://localhost:8080/api/messages/${m.id}`,
-                                        { method: 'DELETE' }
-                                    );
-                                    if (!delRes.ok) throw new Error(delRes.status);
-                                    div.remove();
-                                } catch (err) {
-                                    console.error('Error eliminando mensaje:', err);
-                                    alert('No se pudo eliminar el mensaje.');
+                            // Botón Editar
+                            const editBtn = document.createElement('div');
+                            editBtn.className = 'edit-btn';
+                            editBtn.title = 'Editar mensaje';
+                            const editIcon = document.createElement('i');
+                            editIcon.className = 'fas fa-pencil-alt';
+                            editBtn.appendChild(editIcon);
+                            editBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                openEditModal(m, content); // Pasamos el mensaje y el elemento del contenido
+                            });
+                            actions.appendChild(editBtn);
+
+                            // Botón Eliminar
+                            const deleteBtn = document.createElement('div');
+                            deleteBtn.className = 'delete-btn';
+                            deleteBtn.title = 'Eliminar mensaje';
+                            const trashIcon = document.createElement('i');
+                            trashIcon.className = 'fas fa-trash';
+                            deleteBtn.appendChild(trashIcon);
+                            deleteBtn.addEventListener('click', async e => {
+                                e.stopPropagation();
+                                if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
+                                    try {
+                                        const delRes = await fetch(
+                                            `http://localhost:8080/api/messages/${m.id}`,
+                                            { method: 'DELETE' }
+                                        );
+                                        if (!delRes.ok) throw new Error(delRes.status);
+                                        div.remove();
+                                    } catch (err) {
+                                        console.error('Error eliminando mensaje:', err);
+                                        alert('No se pudo eliminar el mensaje.');
+                                    }
                                 }
-                            }
-                        });
-                        actions.appendChild(deleteBtn);
+                            });
+                            actions.appendChild(deleteBtn);
 
-                        div.appendChild(actions);
-                    }
+                            div.appendChild(actions);
+                        }
 
-                    messagesContainer.appendChild(div);
-                });
+                        messagesContainer.appendChild(div);
+                    });
 
-                // Scroll al final
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    // Scroll al final
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
             } catch (err) {
                 console.error('Error cargando mensajes:', err);
                 // Opcional: mostrar mensaje de error al usuario
@@ -929,6 +938,7 @@
                 messagesContainer.appendChild(errorDiv);
             }
         }
+
 
         function openEditModal(message, contentElement) {
             const modal = document.getElementById('editMessageModal');
@@ -1117,19 +1127,25 @@
             });
         }
 
+        // Variable para almacenar el intervalo
+        let chatRefreshInterval = null;
+
         async function startChatWithContact(contacto) {
             currentContactId = contacto.id;
-            const response = await fetch(`http://localhost:8080/api/user/${currentUserId}/${currentContactId}/messages`);
 
-            if (!response.ok) {
-                console.error('No se pudo cargar/obtener los mensajes', response.status);
-                return;
+            // Detener el intervalo anterior si existe
+            if (chatRefreshInterval) {
+                clearInterval(chatRefreshInterval);
             }
 
-            const mensajes = await response.json(); // <-- Aquí extraes los datos JSON
-            //console.log(mensajes); // <-- Ahora verás el array []
+            // Cargar mensajes inmediatamente
+            await loadChatMessages();
 
-            // Resto de tu código...
+            // Configurar intervalo para refrescar mensajes cada 5 segundos
+            chatRefreshInterval = setInterval(async () => {
+                await loadChatMessages();
+            }, 5000); // 5000 ms = 5 segundos
+
             document.querySelector('.chat-list-view').classList.remove('active');
             document.querySelector('.chat-detail-view').classList.add('active');
 
@@ -1139,8 +1155,6 @@
                 : 'https://www.gravatar.com/avatar/default?s=200';
             chatHeader.querySelector('.profile-pic').src = avatarUrl;
             chatHeader.querySelector('.chat-name').textContent = contacto.username || 'Usuario sin nombre';
-
-            loadChatMessages();
         }
 
         // Funciones para manejar el chat IA
