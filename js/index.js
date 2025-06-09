@@ -159,11 +159,11 @@ function mostrarMensaje(mensaje, tipo) {
     contenedorMensaje.className = `mensaje ${tipo}`; // Aplica la clase de estilo
     contenedorMensaje.style.display = "block"; // Muestra el mensaje
 
-    // Opcional: Ocultar el mensaje después de unos segundos
     setTimeout(() => {
         contenedorMensaje.style.display = "none";
     }, 5000); // 5 segundos
 }
+
 // Función para validar el nombre
 function validarNombre(nombre) {
     const regex = /^[A-Za-zñÑáéíóúÁÉÍÓÚ ]{1,50}$/;
