@@ -173,10 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error("Error:", error);
                 }
-                /*e.stopPropagation();
-                console.log('Usuario agregado:', user.id);
-                // Aquí iría tu lógica para agregar el usuario
-                mostrarMensaje("Solicitud de amistad enviada", "exito")*/
             });
 
             userSearchResults.appendChild(userCard);
@@ -814,7 +810,7 @@ async function sendMessage() {
         const time = document.createElement('span');
         time.className = 'message-time';
         time.textContent = new Date(nuevo.createdAt).toLocaleTimeString();
-        div.appendChild(time);                  // <— ¡Ojo aquí, lo insertas en el div!
+        div.appendChild(time);
 
         // Actions container
         const actions = document.createElement('div');
@@ -830,7 +826,6 @@ async function sendMessage() {
 
         editBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            //console.log("mensaje de mierda: " + nuevo.contenido)
             openEditModal(nuevo, content); // Pasamos el mensaje y el elemento del contenido
         });
 
@@ -918,7 +913,6 @@ function renderContactList(contactos) {
 let chatRefreshInterval = null;
 
 async function startChatWithContact(contacto) {
-    console.log("el contacto de mierda es: " + contacto)
     currentContactId = contacto.id;
 
     // Detener el intervalo anterior si existe
@@ -974,12 +968,12 @@ async function sendAIMessage() {
 
     if (!message) return;
 
-    // 1. Mostrar el mensaje del usuario
+    // Mostrar el mensaje del usuario
     addAIMessage(message, 'sent');
     input.value = '';
 
     try {
-        // 2. Llamada a tu API
+        // Llamada a tu API
         const response = await fetch(`http://localhost:8080/api/chat/${currentUserId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -990,13 +984,13 @@ async function sendAIMessage() {
             throw new Error(`Error en la respuesta: ${response.status}`);
         }
 
-        // 3. Obtener el texto completo de la respuesta
+        // Obtener el texto completo de la respuesta
         let text = await response.text();
 
-        // 4. Eliminar todas las apariciones de "**Respuesta:**"
+        // Eliminar todas las apariciones de "**Respuesta:**"
         text = text.replace(/\*\*Respuesta:\*\*/g, '').trim();
 
-        // 5. Mostrar la respuesta de la IA en el chat
+        // Mostrar la respuesta de la IA en el chat
         addAIMessage(text, 'received');
 
     } catch (err) {
